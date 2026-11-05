@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Jobs · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Background jobs</h1>
+<p class="muted">Concurrency: {{ cfg.max_concurrent_jobs }} · Jobs survive restarts and resume from their last checkpoint. Measured totals (last 200 calls): {{ agg.calls }} model calls · ${{ '%.3f'|format(agg.cost) }} · {{ agg.tin }} in / {{ agg.tout }} out tokens · {{ agg.seconds|round|int }} s of model time.</p>
+<table class="table">
+<tr><th>Created</th><th>Lecture</th><th>Kind</th><th>Status</th><th>Progress</th><th>Attempts</th><th>Cost</th><th>Message</th><th></th></tr>
+{% for j in jobs %}
+<tr id="job-{{ j.id }}">
+  <td class="small">{{ j.created_at.strftime('%m-%d %H:%M') }}</td>
+  <td><a href="/lectures/{{ j.lecture_id }}">{{ j.lecture.title if j.lecture else j.lecture_id }}</a></td>
+  <td>{{ j.kind }}{% if j.params and j.params.sections %}<div class="small muted">{{ j.params.sections|join(', ') }}</div>{% endif %}</td>
+  <td><span class="pill status {{ j.status }}">{{ j.status }}</span></td>
+  <td>{{ (j.progress*100)|round|int }}%</td><td>{{ j.attempts }}</td><td>${{ '%.2f'|format(j.cost_usd or 0) }}</td>
+  <td class="small">{{ j.message[:120] }}{% if j.error %}<div class="error small">{{ j.error[:300] }}</div>{% endif %}</td>
+  <td class="nowrap">
+    {% if j.status in ('queued','running') %}<button class="btn tiny" onclick="jobAction('{{ j.id }}','cancel')">Cancel</button>{% endif %}
+    {% if j.status in ('failed','cancelled') %}<button class="btn tiny" onclick="jobAction('{{ j.id }}','retry')">Retry</button>{% endif %}
+  </td>
+</tr>
+{% endfor %}
+</table>
+<h3>Recent model calls</h3>
+<table class="table small">
+<tr><th>Time</th><th>Step</th><th>Model</th><th>In</th><th>Out</th><th>Cache read</th><th>Cost</th><th>Seconds</th></tr>
+{% for c in calls %}<tr><td>{{ c.created_at.strftime('%H:%M:%S') }}</td><td>{{ c.step }}</td><td>{{ c.model }}</td><td>{{ c.tokens_in }}</td><td>{{ c.tokens_out }}</td><td>{{ c.cache_read }}</td><td>${{ '%.4f'|format(c.cost_usd) }}</td><td>{{ '%.1f'|format(c.seconds) }}</td></tr>{% endfor %}
+</table>
+{% endblock %}

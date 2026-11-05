@@ -1,0 +1,14 @@
+FDE Week 2 - Tool Use (SYNTHETIC FIXTURE Otter summary)
+Sun, Oct 12, 2025 9:00AM
+
+Summary
+The instructor introduced tool use and agent loops, showed a demo of a weather tool, and discussed validation of arguments. Students asked about error handling.
+
+Outline
+- Tool definitions and schemas
+- The agent loop
+- Validation and retries
+
+Action Items
+- Read the tool use documentation
+- Finish exercise 2

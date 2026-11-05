@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Review import · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Confirm imported lectures</h1>
+{% if errors %}<div class="alert error">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+<form method="post" action="/import/confirm">
+<input type="hidden" name="ids" value="{{ previews|map(attribute='lec.id')|join(',') }}">
+{% for p in previews %}
+{% set lec = p.lec %}
+<section class="card review">
+  <div class="cols">
+    <div class="field grow"><label>Title</label><input name="title_{{ lec.id }}" value="{{ lec.title }}"></div>
+    <div class="field"><label>Course</label><input name="course_{{ lec.id }}" value="{{ lec.course.name }}"></div>
+    <div class="field narrow"><label>Week</label><input type="number" name="week_{{ lec.id }}" value="{{ lec.week or '' }}"></div>
+    <div class="field"><label>Date</label><input type="date" name="date_{{ lec.id }}" value="{{ lec.lecture_date or '' }}"></div>
+  </div>
+  <div class="assessment {{ 'ok' if p.assessment.sufficient_for_comprehensive_notes else 'warn' }}">
+    <strong>{{ p.assessment.kind.replace('_',' ')|capitalize }}</strong> ·
+    {{ p.assessment.word_count }} words · {{ p.assessment.segment_count }} paragraphs
+    {% if p.assessment.duration_seconds %} · {{ p.assessment.duration_seconds|ts }}{% endif %}
+    · timestamps: {{ 'yes' if p.assessment.has_timestamps else 'no' }} · speakers: {{ 'yes' if p.assessment.has_speakers else 'no' }}
+    {% if not p.assessment.sufficient_for_comprehensive_notes %}<div><strong>Comprehensive notes are not possible from this material.</strong></div>{% endif %}
+    <ul class="small">{% for n in p.assessment.notes %}<li>{{ n }}</li>{% endfor %}</ul>
+  </div>
+  <details>
+    <summary>Preview imported content ({{ p.files|length }} file(s))</summary>
+    <ul class="small">{% for f in p.files %}<li>{{ f.kind }}: {{ f.original_name }} ({{ f.size_bytes }} bytes)</li>{% endfor %}</ul>
+    <div class="transcript preview">
+      {% for s in p.segments_head %}<p><span class="ref">{{ s.pid }}{% if s.start is not none %} @{{ s.start|ts }}{% endif %}</span> {% if s.speaker %}<b>{{ s.speaker }}:</b>{% endif %} {{ s.text }}</p>{% endfor %}
+      {% if p.segments_tail %}<p class="muted">… {{ p.assessment.segment_count - 9 }} more paragraphs …</p>
+      {% for s in p.segments_tail %}<p><span class="ref">{{ s.pid }}{% if s.start is not none %} @{{ s.start|ts }}{% endif %}</span> {% if s.speaker %}<b>{{ s.speaker }}:</b>{% endif %} {{ s.text }}</p>{% endfor %}{% endif %}
+    </div>
+  </details>
+  <label class="check"><input type="checkbox" name="delete_{{ lec.id }}" value="1"> Discard this import</label>
+</section>
+{% endfor %}
+<div class="row gap">
+  <button class="btn primary" type="submit" name="generate" value="1">Confirm and generate notes</button>
+  <button class="btn" type="submit">Confirm only (generate later)</button>
+</div>
+<p class="muted small">Generation runs in the background ({{ cfg.max_concurrent_jobs }} lectures at a time) using {{ cfg.provider }} / {{ cfg.model }}. Spending limit per lecture: ${{ cfg.spend_limit_usd_per_lecture }}.</p>
+</form>
+{% endblock %}

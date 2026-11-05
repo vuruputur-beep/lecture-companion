@@ -1,0 +1,53 @@
+FDE Week 3 - Evaluation (SYNTHETIC FIXTURE, no timestamps)
+
+Okay, let's move on to retrieval augmented generation. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. I will put the notebook in the Slack channel after class. Think of retrieval augmented generation as a map, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me show you on the screen here. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Think of retrieval augmented generation as a map, that is the analogy I like.
+
+Think of retrieval augmented generation as a translator, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Let me show you on the screen here. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me fix that typo, it should be top underscore k not top k. Think of retrieval augmented generation as a checklist, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this.
+
+So the key idea is this. Let me fix that typo, it should be top underscore k not top k. Think of retrieval augmented generation as a checklist, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. A common mistake with retrieval augmented generation is to skip measurement and trust vibes.
+
+Think of retrieval augmented generation as a checklist, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Let me show you on the screen here. Let me show you on the screen here.
+
+Okay, let's move on to chunking strategies. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+Think of chunking strategies as a map, that is the analogy I like. I will put the notebook in the Slack channel after class. A common mistake with chunking strategies is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Let me show you on the screen here. So the key idea is this. A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a map, that is the analogy I like.
+
+A common mistake with chunking strategies is to skip measurement and trust vibes. So the key idea is this. Let me show you on the screen here. Think of chunking strategies as a library index, that is the analogy I like. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Does that make sense to everyone? I will put the notebook in the Slack channel after class. Think of chunking strategies as a checklist, that is the analogy I like.
+
+Think of chunking strategies as a checklist, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Think of chunking strategies as a library index, that is the analogy I like. I will put the notebook in the Slack channel after class. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k.
+
+Quick question, how do you pick the embedding model?
+
+Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+What if the customer's documents are scanned PDFs?
+
+Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+Okay, let's move on to evaluation. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+A common mistake with evaluation is to skip measurement and trust vibes. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. We will use the LangChain docs as a reference, but you do not need the framework. Think of evaluation as a library index, that is the analogy I like.
+
+We will use the LangChain docs as a reference, but you do not need the framework. Think of evaluation as a translator, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+I will put the notebook in the Slack channel after class. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Let me fix that typo, it should be top underscore k not top k. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a map, that is the analogy I like.
+
+You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a library index, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. So the key idea is this.
+
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of evaluation as a library index, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework.
+
+A common mistake with evaluation is to skip measurement and trust vibes. Does that make sense to everyone? You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a library index, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k.
+
+Next week we will cover evaluation harnesses in depth and start the capstone project. See you Sunday.

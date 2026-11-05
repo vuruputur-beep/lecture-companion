@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Search · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Search</h1>
+<form class="row gap" method="get" action="/search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search notes, interview questions, glossary and transcripts…" class="grow" autofocus>
+  <select name="lecture"><option value="">All lectures</option>{% for l in lectures %}<option value="{{ l.id }}" {% if l.id == lecture_filter %}selected{% endif %}>W{{ l.week or '?' }} · {{ l.title }}</option>{% endfor %}</select>
+  <button class="btn primary">Search</button>
+</form>
+{% if q %}
+<p class="muted">{{ results|length }} result(s) for “{{ q }}”</p>
+{% for r in results %}
+<div class="card result">
+  <div class="small muted">{{ r.lecture_title }} · {{ r.kind }}</div>
+  <a href="/lectures/{{ r.lecture_id }}{% if r.kind == 'transcript' %}?view=source{% endif %}#{{ r.anchor }}"><strong>{{ r.title or r.anchor }}</strong></a>
+  <div class="snippet">{{ r.snip|safe }}</div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

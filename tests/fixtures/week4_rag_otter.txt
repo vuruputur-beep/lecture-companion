@@ -1,0 +1,356 @@
+FDE Week 4 - RAG Systems (SYNTHETIC FIXTURE)
+Sun, Oct 26, 2025 9:02AM
+
+Speaker 1  0:00
+Okay, let's move on to retrieval augmented generation. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+Speaker 1  1:00
+Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. So the key idea is this. Let me show you on the screen here. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+Speaker 1  2:49
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of retrieval augmented generation as a library index, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Does that make sense to everyone? A common mistake with retrieval augmented generation is to skip measurement and trust vibes.
+
+Speaker 1  3:45
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me show you on the screen here.
+
+Speaker 1  5:43
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of retrieval augmented generation as a library index, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+Speaker 1  6:46
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Think of retrieval augmented generation as a library index, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  8:18
+RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a library index, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Does that make sense to everyone? Let me show you on the screen here.
+
+Speaker 1  9:43
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me fix that typo, it should be top underscore k not top k. Think of retrieval augmented generation as a map, that is the analogy I like.
+
+Speaker 1  10:38
+You can find the models on Hugging Face, huggingface dot co. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. We will use the LangChain docs as a reference, but you do not need the framework. Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes.
+
+Speaker 1  11:38
+RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. So the key idea is this. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of retrieval augmented generation as a map, that is the analogy I like.
+
+Speaker 1  12:28
+RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Does that make sense to everyone? We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Think of retrieval augmented generation as a translator, that is the analogy I like.
+
+Speaker 1  13:21
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Does that make sense to everyone? Think of retrieval augmented generation as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+Speaker 1  15:19
+A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. Let me fix that typo, it should be top underscore k not top k. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a translator, that is the analogy I like.
+
+Speaker 1  16:25
+Let me show you on the screen here. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a map, that is the analogy I like. Does that make sense to everyone?
+
+Speaker 1  18:00
+RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a map, that is the analogy I like. Does that make sense to everyone? A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class.
+
+Speaker 1  19:02
+Okay, let's move on to chunking strategies. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+Speaker 1  20:09
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. I will put the notebook in the Slack channel after class. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a translator, that is the analogy I like.
+
+Speaker 1  21:04
+Think of chunking strategies as a checklist, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. So the key idea is this.
+
+Speaker 1  22:22
+If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. You can find the models on Hugging Face, huggingface dot co. So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes.
+
+Speaker 1  23:23
+If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a library index, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. A common mistake with chunking strategies is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k.
+
+Speaker 1  24:58
+A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a map, that is the analogy I like. I will put the notebook in the Slack channel after class. Does that make sense to everyone? If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+Speaker 1  26:39
+So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  28:36
+So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  30:09
+A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. So the key idea is this. Think of chunking strategies as a translator, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  31:08
+Let me fix that typo, it should be top underscore k not top k. Let me fix that typo, it should be top underscore k not top k. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a map, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes.
+
+Speaker 1  32:06
+Think of chunking strategies as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  33:09
+A common mistake with chunking strategies is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a library index, that is the analogy I like.
+
+Speaker 1  35:00
+We will use the LangChain docs as a reference, but you do not need the framework. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a checklist, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  36:09
+Think of chunking strategies as a map, that is the analogy I like. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with chunking strategies is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this.
+
+Speaker 1  36:57
+If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Think of chunking strategies as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 2  38:28
+Quick question, how do you pick the embedding model?
+
+Speaker 1  38:45
+Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+Speaker 3  39:07
+What if the customer's documents are scanned PDFs?
+
+Speaker 1  39:25
+Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+Speaker 1  39:47
+Okay, let's move on to evaluation. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+Speaker 1  40:57
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of evaluation as a translator, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes.
+
+Speaker 1  41:52
+You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a map, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Does that make sense to everyone? A common mistake with evaluation is to skip measurement and trust vibes.
+
+Speaker 1  42:48
+A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a map, that is the analogy I like. I will put the notebook in the Slack channel after class. I will put the notebook in the Slack channel after class. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+Speaker 1  43:36
+You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. So the key idea is this. Think of evaluation as a map, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. So the key idea is this.
+
+Speaker 1  44:40
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a checklist, that is the analogy I like. Let me show you on the screen here. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+Speaker 1  46:20
+Let me show you on the screen here. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of evaluation as a checklist, that is the analogy I like.
+
+Speaker 1  48:20
+Think of evaluation as a translator, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with evaluation is to skip measurement and trust vibes.
+
+Speaker 1  50:03
+A common mistake with evaluation is to skip measurement and trust vibes. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a map, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  51:44
+Think of evaluation as a library index, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. So the key idea is this. So the key idea is this.
+
+Speaker 1  53:40
+Let me show you on the screen here. Think of evaluation as a translator, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  54:56
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Let me show you on the screen here. Think of evaluation as a translator, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+Speaker 1  55:49
+You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  57:31
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a map, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  59:13
+Think of evaluation as a map, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. So the key idea is this. Does that make sense to everyone? A common mistake with evaluation is to skip measurement and trust vibes.
+
+Speaker 1  1:00:28
+Okay, let's move on to the forward deployed engineer role. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+Speaker 1  1:01:35
+You can find the models on Hugging Face, huggingface dot co. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Does that make sense to everyone? An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+Speaker 1  1:02:38
+A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  1:03:43
+An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a checklist, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class.
+
+Speaker 1  1:04:53
+A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Does that make sense to everyone? We will use the LangChain docs as a reference, but you do not need the framework. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a translator, that is the analogy I like.
+
+Speaker 1  1:06:34
+Let me show you on the screen here. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a map, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  1:07:33
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Does that make sense to everyone? Think of the forward deployed engineer role as a library index, that is the analogy I like.
+
+Speaker 1  1:08:52
+An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. You can find the models on Hugging Face, huggingface dot co. Think of the forward deployed engineer role as a map, that is the analogy I like. So the key idea is this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes.
+
+Speaker 1  1:10:18
+Think of the forward deployed engineer role as a translator, that is the analogy I like. Let me show you on the screen here. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Does that make sense to everyone?
+
+Speaker 1  1:11:05
+Think of the forward deployed engineer role as a translator, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Does that make sense to everyone? Does that make sense to everyone?
+
+Speaker 1  1:12:05
+Think of the forward deployed engineer role as a library index, that is the analogy I like. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Let me fix that typo, it should be top underscore k not top k. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  1:12:55
+Does that make sense to everyone? A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  1:14:05
+A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of the forward deployed engineer role as a translator, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  1:15:24
+We will use the LangChain docs as a reference, but you do not need the framework. Think of the forward deployed engineer role as a library index, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+Speaker 1  1:17:14
+Let me fix that typo, it should be top underscore k not top k. Let me fix that typo, it should be top underscore k not top k. Think of the forward deployed engineer role as a checklist, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+Speaker 2  1:19:08
+Quick question, how do you pick the embedding model?
+
+Speaker 1  1:19:35
+Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+Speaker 3  1:20:06
+What if the customer's documents are scanned PDFs?
+
+Speaker 1  1:20:30
+Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+Speaker 1  1:21:07
+Okay, let's move on to prompt caching. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+Speaker 1  1:22:00
+Think of prompt caching as a translator, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this.
+
+Speaker 1  1:23:01
+You can find the models on Hugging Face, huggingface dot co. Think of prompt caching as a library index, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me show you on the screen here. A common mistake with prompt caching is to skip measurement and trust vibes.
+
+Speaker 1  1:24:34
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Think of prompt caching as a translator, that is the analogy I like.
+
+Speaker 1  1:25:39
+Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Let me show you on the screen here. Think of prompt caching as a map, that is the analogy I like.
+
+Speaker 1  1:26:55
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me show you on the screen here. Think of prompt caching as a translator, that is the analogy I like.
+
+Speaker 1  1:28:28
+A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Does that make sense to everyone? You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  1:29:24
+Think of prompt caching as a library index, that is the analogy I like. So the key idea is this. You can find the models on Hugging Face, huggingface dot co. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes.
+
+Speaker 1  1:30:47
+Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a checklist, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. Does that make sense to everyone?
+
+Speaker 1  1:32:13
+Think of prompt caching as a checklist, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me fix that typo, it should be top underscore k not top k. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  1:34:02
+So the key idea is this. Think of prompt caching as a library index, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+Speaker 1  1:35:33
+Does that make sense to everyone? A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me fix that typo, it should be top underscore k not top k.
+
+Speaker 1  1:37:26
+In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of prompt caching as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+Speaker 1  1:39:18
+Does that make sense to everyone? A common mistake with prompt caching is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+Speaker 1  1:40:32
+I will put the notebook in the Slack channel after class. Let me fix that typo, it should be top underscore k not top k. Think of prompt caching as a map, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+Speaker 1  1:41:22
+Okay, let's move on to tool use and agents. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+Speaker 1  1:42:41
+The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with tool use and agents is to skip measurement and trust vibes. So the key idea is this. Think of tool use and agents as a library index, that is the analogy I like.
+
+Speaker 1  1:44:38
+Think of tool use and agents as a library index, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. So the key idea is this. A common mistake with tool use and agents is to skip measurement and trust vibes. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+Speaker 1  1:45:50
+The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Let me fix that typo, it should be top underscore k not top k. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a translator, that is the analogy I like.
+
+Speaker 1  1:46:50
+Think of tool use and agents as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You can find the models on Hugging Face, huggingface dot co. A common mistake with tool use and agents is to skip measurement and trust vibes. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+Speaker 1  1:48:33
+You can find the models on Hugging Face, huggingface dot co. Think of tool use and agents as a map, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Does that make sense to everyone? A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+Speaker 1  1:50:32
+A common mistake with tool use and agents is to skip measurement and trust vibes. Does that make sense to everyone? The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of tool use and agents as a checklist, that is the analogy I like.
+
+Speaker 1  1:51:31
+We will use the LangChain docs as a reference, but you do not need the framework. Think of tool use and agents as a checklist, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Let me fix that typo, it should be top underscore k not top k. A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+Speaker 1  1:52:16
+The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. I will put the notebook in the Slack channel after class. A common mistake with tool use and agents is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k. Think of tool use and agents as a map, that is the analogy I like.
+
+Speaker 1  1:53:49
+We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with tool use and agents is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework. Think of tool use and agents as a library index, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+Speaker 1  1:54:49
+A common mistake with tool use and agents is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. You can find the models on Hugging Face, huggingface dot co. Think of tool use and agents as a library index, that is the analogy I like.
+
+Speaker 1  1:56:23
+I will put the notebook in the Slack channel after class. A common mistake with tool use and agents is to skip measurement and trust vibes. Does that make sense to everyone? The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Think of tool use and agents as a translator, that is the analogy I like.
+
+Speaker 1  1:57:14
+The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. You can find the models on Hugging Face, huggingface dot co. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a checklist, that is the analogy I like.
+
+Speaker 1  1:58:23
+Let me show you on the screen here. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Think of tool use and agents as a map, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+Speaker 1  1:59:14
+I will put the notebook in the Slack channel after class. So the key idea is this. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a map, that is the analogy I like.
+
+Speaker 2  2:00:20
+Quick question, how do you pick the embedding model?
+
+Speaker 1  2:00:50
+Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+Speaker 3  2:01:18
+What if the customer's documents are scanned PDFs?
+
+Speaker 1  2:01:43
+Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+Speaker 1  2:02:07
+Okay, let's move on to deployment and observability. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed.
+
+Speaker 1  2:03:06
+Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. A common mistake with deployment and observability is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. Think of deployment and observability as a translator, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  2:04:06
+Does that make sense to everyone? Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a checklist, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. So the key idea is this.
+
+Speaker 1  2:05:48
+A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a map, that is the analogy I like. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. I will put the notebook in the Slack channel after class. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  2:06:55
+A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. We will use the LangChain docs as a reference, but you do not need the framework. Think of deployment and observability as a library index, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+Speaker 1  2:07:42
+Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a map, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. I will put the notebook in the Slack channel after class.
+
+Speaker 1  2:09:10
+Let me show you on the screen here. A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+Speaker 1  2:10:06
+Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a checklist, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. I will put the notebook in the Slack channel after class. A common mistake with deployment and observability is to skip measurement and trust vibes.
+
+Speaker 1  2:10:53
+So the key idea is this. Think of deployment and observability as a library index, that is the analogy I like. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. I will put the notebook in the Slack channel after class. A common mistake with deployment and observability is to skip measurement and trust vibes.
+
+Speaker 1  2:12:28
+Let me fix that typo, it should be top underscore k not top k. Think of deployment and observability as a map, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  2:13:32
+Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of deployment and observability as a library index, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed.
+
+Speaker 1  2:14:46
+Let me show you on the screen here. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. So the key idea is this. A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a translator, that is the analogy I like.
+
+Speaker 1  2:15:43
+Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a translator, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Does that make sense to everyone? Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+Speaker 1  2:16:56
+Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Let me show you on the screen here. A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a library index, that is the analogy I like.
+
+Speaker 1  2:18:12
+A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Let me fix that typo, it should be top underscore k not top k.
+
+Speaker 1  2:19:04
+Next week we will cover evaluation harnesses in depth and start the capstone project. See you Sunday.

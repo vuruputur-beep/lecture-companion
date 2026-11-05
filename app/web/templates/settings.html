@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Settings · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+{% if msg %}<div class="alert {{ 'error' if msg.startswith('FAILED') else 'ok' }}">{{ msg }}</div>{% endif %}
+
+<section class="card">
+  <h2>AI provider credentials</h2>
+  <p class="muted small">Keys are written to <code>data/secrets.env</code> (permissions 0600), never into source control or browser code, and only a masked form is shown here. Environment variables with the same names take precedence.</p>
+  <table class="table">
+    <tr><th>Key</th><th>Status</th><th>Source</th><th>Set / replace</th></tr>
+    {% for k in secret_keys %}
+    <tr><td><code>{{ k }}</code></td><td>{{ secrets[k].masked or '— not set —' }}</td><td>{{ secrets[k].source }}</td>
+      <td><form method="post" action="/settings/secret" class="row gap"><input type="hidden" name="name" value="{{ k }}"><input type="password" name="value" placeholder="paste key" autocomplete="off"><button class="btn tiny">Save</button></form></td></tr>
+    {% endfor %}
+  </table>
+  <form method="post" action="/settings/test"><button class="btn">Test connection with current provider/model</button></form>
+</section>
+
+<form method="post" action="/settings" class="card form">
+  <h2>Generation</h2>
+  <div class="cols">
+    <div class="field"><label>Provider</label>
+      <select name="provider">{% for p in ['anthropic','openai','openai_compatible','mock'] %}<option value="{{ p }}" {% if cfg.provider == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+      <div class="hint">mock = offline fixture output for testing the workflow without a key.</div></div>
+    <div class="field"><label>Model</label><input name="model" value="{{ cfg.model }}" list="models">
+      <datalist id="models"><option value="claude-opus-5-5"><option value="claude-sonnet-5-5"><option value="claude-haiku-4-5"><option value="gpt-5"><option value="gpt-5-mini"><option value="gpt-4.1"></datalist></div>
+    <div class="field"><label>Effort (Anthropic)</label><select name="effort">{% for e in ['low','medium','high','xhigh','max'] %}<option {% if cfg.effort == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+  </div>
+  <div class="field"><label>OpenAI-compatible base URL (for local servers)</label><input name="openai_base_url" value="{{ cfg.openai_base_url }}" placeholder="http://localhost:11434/v1"></div>
+  <div class="cols">
+    <div class="field"><label>Concurrent lecture jobs</label><input type="number" name="max_concurrent_jobs" min="1" max="8" value="{{ cfg.max_concurrent_jobs }}"></div>
+    <div class="field"><label>Words per analysis chunk</label><input type="number" name="chunk_words" min="2000" max="20000" step="500" value="{{ cfg.chunk_words }}"></div>
+    <div class="field"><label>Spend limit per lecture (USD)</label><input type="number" step="0.5" name="spend_limit_usd_per_lecture" value="{{ cfg.spend_limit_usd_per_lecture }}"></div>
+    <div class="field"><label>Total spend limit (USD)</label><input type="number" step="1" name="spend_limit_usd_total" value="{{ cfg.spend_limit_usd_total }}"></div>
+  </div>
+  <label class="check"><input type="checkbox" name="verify_links" value="1" {% if cfg.verify_links %}checked{% endif %}> Verify paper and resource links online (arXiv, Crossref, HTTP)</label>
+  <h2>Study</h2>
+  <div class="cols">
+    <div class="field"><label>Study session length (minutes)</label><input type="number" name="study_session_minutes" min="5" max="90" value="{{ cfg.study_session_minutes }}"></div>
+    <div class="field"><label>Timezone</label><input name="timezone" value="{{ cfg.timezone }}"></div>
+    <div class="field grow"><label>Default course</label><input name="default_course" value="{{ cfg.default_course }}"></div>
+  </div>
+  <button class="btn primary">Save settings</button>
+</form>
+
+<section class="card">
+  <h2>Environment</h2>
+  <ul class="small">
+    <li>PDF export engine: {% if chrome %}<code>{{ chrome }}</code>{% else %}<span class="error">no Chrome/Chromium found - PDF export disabled (HTML/DOCX/MD still work)</span>{% endif %}</li>
+    <li>Lecture data on disk: {{ (data_size/1048576)|round(1) }} MB</li>
+  </ul>
+</section>
+{% endblock %}

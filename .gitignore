@@ -1,0 +1,8 @@
+data/
+.venv/
+__pycache__/
+*.pyc
+.env
+secrets.env
+.DS_Store
+tests/_data_test/

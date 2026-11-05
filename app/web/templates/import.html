@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Import · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Import lectures</h1>
+<p class="muted">Upload Otter.ai exports (TXT, SRT, VTT, DOCX, text-based PDF) or paste a transcript. Multiple files create one lecture each. You will confirm title, course, week and date on the next screen before anything is generated.</p>
+{% if errors %}<div class="alert error">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
+<form class="card form" method="post" action="/import" enctype="multipart/form-data">
+  <div class="field">
+    <label>Transcript files</label>
+    <input type="file" name="transcripts" multiple accept=".txt,.srt,.vtt,.docx,.pdf,.md">
+    <div class="hint">Otter: open a conversation → Export → choose TXT (with speakers & timestamps) for best results. Timestamps and speaker labels are preserved; summaries are detected and flagged.</div>
+  </div>
+  <div class="field">
+    <label>…or paste a transcript</label>
+    <textarea name="pasted" rows="8" placeholder="Speaker 1  0:00&#10;Welcome back everyone…"></textarea>
+  </div>
+  <div class="cols">
+    <div class="field"><label>Course</label>
+      <input type="text" name="course" list="courses" value="{{ cfg.default_course }}" required>
+      <datalist id="courses">{% for n in course_names %}<option value="{{ n }}">{% endfor %}</datalist></div>
+    <div class="field"><label>Week</label><input type="number" name="week" min="1" max="52" placeholder="auto-detect"></div>
+    <div class="field"><label>Date</label><input type="date" name="lecture_date"></div>
+  </div>
+  <div class="field"><label>Title (single lecture only; auto-detected otherwise)</label><input type="text" name="title" placeholder="e.g. Week 4 - RAG systems"></div>
+  <div class="field">
+    <label>Optional attachments for this lecture (slides PDF, screenshots PNG/JPG, recording)</label>
+    <input type="file" name="attachments" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.mov,.m4a,.mp3,.wav,.mkv,.webm">
+    <div class="hint">Slides are split into pages and described; screenshots are described and their visible text extracted. Recordings are stored for the video-processing release and are not transcribed here. When importing several transcripts at once, attachments go to the first lecture — attach others from each lecture's Source tab.</div>
+  </div>
+  <button class="btn primary" type="submit">Upload and review</button>
+</form>
+{% endblock %}

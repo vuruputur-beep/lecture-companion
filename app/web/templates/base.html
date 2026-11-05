@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Lecture Companion{% endblock %}</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="{% block bodyclass %}{% endblock %}">
+<header class="topbar">
+  <a class="brand" href="/">📚 Lecture Companion</a>
+  <nav>
+    <a href="/">Dashboard</a>
+    <a href="/import">Import</a>
+    <a href="/interview">Interview practice</a>
+    <a href="/search">Search</a>
+    <a href="/jobs">Jobs{% if active_jobs %} <span class="pill live">{{ active_jobs|length }}</span>{% endif %}</a>
+    <a href="/settings">Settings</a>
+  </nav>
+  <form class="quicksearch" action="/search" method="get"><input type="search" name="q" placeholder="Search all lectures…" value="{{ q or '' }}"></form>
+</header>
+{% if active_jobs %}
+<div class="jobbar" id="jobbar">
+  {% for j in active_jobs %}
+  <a href="/lectures/{{ j.lecture_id }}" class="jobchip" data-job="{{ j.id }}">
+    <span class="dot {{ j.status }}"></span><span class="jobmsg">{{ j.kind }} · {{ (j.progress*100)|round|int }}% · {{ j.message[:70] }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+<main class="{% block mainclass %}container{% endblock %}">
+{% block content %}{% endblock %}
+</main>
+<footer class="foot">Private, local, single user · data in <code>data/</code> · provider: {{ cfg.provider }} / {{ cfg.model }}</footer>
+<script src="/static/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

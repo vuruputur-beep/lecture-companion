@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Interview practice · Lecture Companion{% endblock %}
+{% block content %}
+<div class="row between">
+  <h1>Interview practice</h1>
+  <form method="get" class="row gap"><select name="lecture" onchange="this.form.submit()"><option value="">All lectures</option>{% for l in lectures %}<option value="{{ l.id }}" {% if l.id == lecture_filter %}selected{% endif %}>W{{ l.week or '?' }} · {{ l.title }}</option>{% endfor %}</select></form>
+</div>
+<p class="muted">{{ cards|length }} questions. Read the question, answer aloud for 30-60 seconds, then reveal. Mark a card <em>practiced</em> to track progress; answers marked “generated” are practice answers, not the instructor's words.</p>
+<div class="row gap small"><button class="btn" onclick="document.querySelectorAll('.iq details').forEach(d=>d.open=false)">Hide all answers</button>
+<button class="btn" onclick="shuffleCards()">Shuffle</button></div>
+<div id="cards">
+{% for c in cards %}
+<section class="card iq" data-lecture="{{ c.lecture.id }}" data-anchor="{{ c.anchor }}">
+  <div class="small muted">{{ c.lecture.title }} · Concept {{ c.concept.number }}: {{ c.concept.title }} · <span class="pill">{{ c.q.source }}</span></div>
+  <h3>{{ c.q.question }}</h3>
+  <details><summary>Reveal 30-60 s answer</summary><p>{{ c.q.short_answer }}</p></details>
+  <details><summary>Deeper answer</summary><p>{{ c.q.deep_answer }}</p></details>
+  {% if c.q.follow_ups %}<details><summary>Likely follow-ups ({{ c.q.follow_ups|length }})</summary><ul>{% for f in c.q.follow_ups %}<li><strong>{{ f.question }}</strong> — {{ f.suggested_answer }}</li>{% endfor %}</ul></details>{% endif %}
+  {% if c.q.conditions %}<details><summary>What changes the answer</summary><p>{{ c.q.conditions }}</p></details>{% endif %}
+  <div class="row gap small">
+    <button class="btn tiny" onclick="toggleAnn('{{ c.lecture.id }}','practiced','{{ c.anchor }}', this, 'Practiced')">✓ Practiced</button>
+    <button class="btn tiny" onclick="toggleAnn('{{ c.lecture.id }}','review','{{ c.anchor }}', this, 'Needs review')">↺ Needs review</button>
+    <a class="btn tiny" href="/lectures/{{ c.lecture.id }}#concept-{{ c.concept.id }}">Open concept</a>
+  </div>
+</section>
+{% endfor %}
+</div>
+<script>
+function shuffleCards(){const p=document.getElementById('cards');[...p.children].sort(()=>Math.random()-0.5).forEach(c=>p.appendChild(c));}
+</script>
+{% endblock %}

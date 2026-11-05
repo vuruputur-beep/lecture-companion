@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Lecture Companion{% endblock %}
+{% block content %}
+<div class="row between">
+  <h1>Dashboard</h1>
+  <a class="btn primary" href="/import">+ Import lectures</a>
+</div>
+
+{% if resume %}
+<section class="card resume">
+  <div>
+    <div class="eyebrow">Continue where you left off</div>
+    <h2><a href="/lectures/{{ resume.id }}{% if resume.reading_position %}#{{ resume.reading_position }}{% endif %}">{{ resume.title }}</a></h2>
+    <div class="muted">{{ resume.course.name }} · Week {{ resume.week or '?' }} · {{ (resume.reading_progress*100)|round|int }}% read · state: {{ resume.study_state }}</div>
+  </div>
+  <a class="btn" href="/lectures/{{ resume.id }}{% if resume.reading_position %}#{{ resume.reading_position }}{% endif %}">Resume →</a>
+</section>
+{% endif %}
+
+{% if not courses %}
+<section class="card empty">
+  <h2>No lectures yet</h2>
+  <p>Import your Otter.ai transcript exports (TXT, SRT, DOCX, or text PDF), or paste a transcript, to generate study notes.</p>
+  <a class="btn primary" href="/import">Import your first lecture</a>
+  <p class="muted small">Before generating notes, add an AI provider key in <a href="/settings">Settings</a>.</p>
+</section>
+{% endif %}
+
+{% for item in courses %}
+<section class="course">
+  <h2>{{ item.course.name }}</h2>
+  {% for week, lectures in item.weeks %}
+  <div class="week">
+    <h3>{% if week is none %}Week not set{% else %}Week {{ week }}{% endif %}</h3>
+    <div class="grid">
+      {% for lec in lectures %}
+      <a class="card lecture-card status-{{ lec.status }}" href="/lectures/{{ lec.id }}">
+        <div class="row between">
+          <span class="pill state-{{ lec.study_state }}">{{ lec.study_state }}</span>
+          <span class="pill status {{ lec.status }}">{{ lec.status }}</span>
+        </div>
+        <h4>{{ lec.title }}</h4>
+        <div class="muted small">{{ lec.lecture_date or 'date unknown' }} · {{ lec.source_kind.replace('_',' ') }}
+          {% if lec.transcript_json %} · {{ lec.transcript_json.word_count }} words{% if lec.transcript_json.duration_seconds %} · {{ lec.transcript_json.duration_seconds|ts }}{% endif %}{% endif %}</div>
+        {% if lec.notes_json %}<div class="muted small">{{ lec.notes_json.concepts|length }} concepts · v{{ lec.notes_version }} · ${{ '%.2f'|format(lec.cost_usd or 0) }}</div>{% endif %}
+        {% if lec.reading_progress %}<div class="progress"><span style="width:{{ (lec.reading_progress*100)|round|int }}%"></span></div>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endfor %}
+
+{% if recent_jobs %}
+<section>
+  <h3>Recent jobs</h3>
+  <table class="table">
+    <tr><th>Lecture</th><th>Kind</th><th>Status</th><th>Progress</th><th>Cost</th><th>Message</th></tr>
+    {% for j in recent_jobs %}
+    <tr><td><a href="/lectures/{{ j.lecture_id }}">{{ j.lecture.title if j.lecture else j.lecture_id }}</a></td><td>{{ j.kind }}</td>
+      <td><span class="pill status {{ j.status }}">{{ j.status }}</span></td><td>{{ (j.progress*100)|round|int }}%</td>
+      <td>${{ '%.2f'|format(j.cost_usd or 0) }}</td><td class="small">{{ j.message[:90] }}</td></tr>
+    {% endfor %}
+  </table>
+  <div class="muted small">Total: {{ totals.lectures }} lectures · measured spend ${{ '%.2f'|format(totals.cost) }}</div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,6 @@
+pyproject.toml
+lecture_companion.egg-info/PKG-INFO
+lecture_companion.egg-info/SOURCES.txt
+lecture_companion.egg-info/dependency_links.txt
+lecture_companion.egg-info/requires.txt
+lecture_companion.egg-info/top_level.txt

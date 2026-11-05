@@ -1,0 +1,471 @@
+1
+00:00:00,000 --> 00:00:30,000
+Speaker 1: Okay, let's move on to retrieval augmented generation. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+2
+00:01:00,000 --> 00:01:30,000
+Speaker 1: Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. So the key idea is this. Let me show you on the screen here. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+3
+00:02:49,000 --> 00:03:19,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of retrieval augmented generation as a library index, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Does that make sense to everyone? A common mistake with retrieval augmented generation is to skip measurement and trust vibes.
+
+4
+00:03:45,000 --> 00:04:15,000
+Speaker 1: Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me show you on the screen here.
+
+5
+00:05:43,000 --> 00:06:13,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of retrieval augmented generation as a library index, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+6
+00:06:46,000 --> 00:07:16,000
+Speaker 1: A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Think of retrieval augmented generation as a library index, that is the analogy I like. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You can find the models on Hugging Face, huggingface dot co.
+
+7
+00:08:18,000 --> 00:08:48,000
+Speaker 1: RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a library index, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Does that make sense to everyone? Let me show you on the screen here.
+
+8
+00:09:43,000 --> 00:10:13,000
+Speaker 1: A common mistake with retrieval augmented generation is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Let me fix that typo, it should be top underscore k not top k. Think of retrieval augmented generation as a map, that is the analogy I like.
+
+9
+00:10:38,000 --> 00:11:08,000
+Speaker 1: You can find the models on Hugging Face, huggingface dot co. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. We will use the LangChain docs as a reference, but you do not need the framework. Think of retrieval augmented generation as a map, that is the analogy I like. A common mistake with retrieval augmented generation is to skip measurement and trust vibes.
+
+10
+00:11:38,000 --> 00:12:08,000
+Speaker 1: RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. So the key idea is this. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of retrieval augmented generation as a map, that is the analogy I like.
+
+11
+00:12:28,000 --> 00:12:58,000
+Speaker 1: RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Does that make sense to everyone? We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Think of retrieval augmented generation as a translator, that is the analogy I like.
+
+12
+00:13:21,000 --> 00:13:51,000
+Speaker 1: A common mistake with retrieval augmented generation is to skip measurement and trust vibes. Does that make sense to everyone? Think of retrieval augmented generation as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt.
+
+13
+00:15:19,000 --> 00:15:49,000
+Speaker 1: A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. Let me fix that typo, it should be top underscore k not top k. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a translator, that is the analogy I like.
+
+14
+00:16:25,000 --> 00:16:55,000
+Speaker 1: Let me show you on the screen here. A common mistake with retrieval augmented generation is to skip measurement and trust vibes. RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a map, that is the analogy I like. Does that make sense to everyone?
+
+15
+00:18:00,000 --> 00:18:30,000
+Speaker 1: RAG lets a model look things up before it answers. You embed documents into vectors, store them in a vector database, and at query time you retrieve the top k chunks and put them in the prompt. Think of retrieval augmented generation as a map, that is the analogy I like. Does that make sense to everyone? A common mistake with retrieval augmented generation is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class.
+
+16
+00:19:02,000 --> 00:19:32,000
+Speaker 1: Okay, let's move on to chunking strategies. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+17
+00:20:09,000 --> 00:20:39,000
+Speaker 1: Okay, the error says connection refused, that is because the vector database container is not running, let me start it. I will put the notebook in the Slack channel after class. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a translator, that is the analogy I like.
+
+18
+00:21:04,000 --> 00:21:34,000
+Speaker 1: Think of chunking strategies as a checklist, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. So the key idea is this.
+
+19
+00:22:22,000 --> 00:22:52,000
+Speaker 1: If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. You can find the models on Hugging Face, huggingface dot co. So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes.
+
+20
+00:23:23,000 --> 00:23:53,000
+Speaker 1: If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a library index, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. A common mistake with chunking strategies is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k.
+
+21
+00:24:58,000 --> 00:25:28,000
+Speaker 1: A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a map, that is the analogy I like. I will put the notebook in the Slack channel after class. Does that make sense to everyone? If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set.
+
+22
+00:26:39,000 --> 00:27:09,000
+Speaker 1: So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+23
+00:28:36,000 --> 00:29:06,000
+Speaker 1: So the key idea is this. Think of chunking strategies as a library index, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+24
+00:30:09,000 --> 00:30:39,000
+Speaker 1: A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. So the key idea is this. Think of chunking strategies as a translator, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+25
+00:31:08,000 --> 00:31:38,000
+Speaker 1: Let me fix that typo, it should be top underscore k not top k. Let me fix that typo, it should be top underscore k not top k. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a map, that is the analogy I like. A common mistake with chunking strategies is to skip measurement and trust vibes.
+
+26
+00:32:06,000 --> 00:32:36,000
+Speaker 1: Think of chunking strategies as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. A common mistake with chunking strategies is to skip measurement and trust vibes. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. We will use the LangChain docs as a reference, but you do not need the framework.
+
+27
+00:33:09,000 --> 00:33:39,000
+Speaker 1: A common mistake with chunking strategies is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. Think of chunking strategies as a library index, that is the analogy I like.
+
+28
+00:35:00,000 --> 00:35:30,000
+Speaker 1: We will use the LangChain docs as a reference, but you do not need the framework. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. Think of chunking strategies as a checklist, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+29
+00:36:09,000 --> 00:36:39,000
+Speaker 1: Think of chunking strategies as a map, that is the analogy I like. If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with chunking strategies is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this.
+
+30
+00:36:57,000 --> 00:37:27,000
+Speaker 1: If chunks are too big you blow the context window; too small and you lose meaning. Many teams start with five hundred tokens and a fifty token overlap, then tune against an eval set. A common mistake with chunking strategies is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Think of chunking strategies as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+31
+00:38:28,000 --> 00:38:58,000
+Speaker 2: Quick question, how do you pick the embedding model?
+
+32
+00:38:45,000 --> 00:39:15,000
+Speaker 1: Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+33
+00:39:07,000 --> 00:39:37,000
+Speaker 3: What if the customer's documents are scanned PDFs?
+
+34
+00:39:25,000 --> 00:39:55,000
+Speaker 1: Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+35
+00:39:47,000 --> 00:40:17,000
+Speaker 1: Okay, let's move on to evaluation. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+36
+00:40:57,000 --> 00:41:27,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of evaluation as a translator, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes.
+
+37
+00:41:52,000 --> 00:42:22,000
+Speaker 1: You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a map, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Does that make sense to everyone? A common mistake with evaluation is to skip measurement and trust vibes.
+
+38
+00:42:48,000 --> 00:43:18,000
+Speaker 1: A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a map, that is the analogy I like. I will put the notebook in the Slack channel after class. I will put the notebook in the Slack channel after class. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+39
+00:43:36,000 --> 00:44:06,000
+Speaker 1: You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. So the key idea is this. Think of evaluation as a map, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. So the key idea is this.
+
+40
+00:44:40,000 --> 00:45:10,000
+Speaker 1: Okay, the error says connection refused, that is because the vector database container is not running, let me start it. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a checklist, that is the analogy I like. Let me show you on the screen here. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+41
+00:46:20,000 --> 00:46:50,000
+Speaker 1: Let me show you on the screen here. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of evaluation as a checklist, that is the analogy I like.
+
+42
+00:48:20,000 --> 00:48:50,000
+Speaker 1: Think of evaluation as a translator, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with evaluation is to skip measurement and trust vibes.
+
+43
+00:50:03,000 --> 00:50:33,000
+Speaker 1: A common mistake with evaluation is to skip measurement and trust vibes. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. Think of evaluation as a map, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+44
+00:51:44,000 --> 00:52:14,000
+Speaker 1: Think of evaluation as a library index, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. So the key idea is this. So the key idea is this.
+
+45
+00:53:40,000 --> 00:54:10,000
+Speaker 1: Let me show you on the screen here. Think of evaluation as a translator, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+46
+00:54:56,000 --> 00:55:26,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Let me show you on the screen here. Think of evaluation as a translator, that is the analogy I like. A common mistake with evaluation is to skip measurement and trust vibes. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately.
+
+47
+00:55:49,000 --> 00:56:19,000
+Speaker 1: You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a translator, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+48
+00:57:31,000 --> 00:58:01,000
+Speaker 1: Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. A common mistake with evaluation is to skip measurement and trust vibes. Think of evaluation as a map, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+49
+00:59:13,000 --> 00:59:43,000
+Speaker 1: Think of evaluation as a map, that is the analogy I like. You cannot improve what you do not measure. Build a golden set of questions and expected answers, then score retrieval recall and answer faithfulness separately. So the key idea is this. Does that make sense to everyone? A common mistake with evaluation is to skip measurement and trust vibes.
+
+50
+1:00:28,000 --> 1:00:58,000
+Speaker 1: Okay, let's move on to the forward deployed engineer role. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+51
+1:01:35,000 --> 1:02:05,000
+Speaker 1: You can find the models on Hugging Face, huggingface dot co. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Does that make sense to everyone? An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+52
+1:02:38,000 --> 1:03:08,000
+Speaker 1: A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. You can find the models on Hugging Face, huggingface dot co.
+
+53
+1:03:43,000 --> 1:04:13,000
+Speaker 1: An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a checklist, that is the analogy I like. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class.
+
+54
+1:04:53,000 --> 1:05:23,000
+Speaker 1: A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Does that make sense to everyone? We will use the LangChain docs as a reference, but you do not need the framework. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a translator, that is the analogy I like.
+
+55
+1:06:34,000 --> 1:07:04,000
+Speaker 1: Let me show you on the screen here. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Think of the forward deployed engineer role as a map, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+56
+1:07:33,000 --> 1:08:03,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Does that make sense to everyone? Think of the forward deployed engineer role as a library index, that is the analogy I like.
+
+57
+1:08:52,000 --> 1:09:22,000
+Speaker 1: An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. You can find the models on Hugging Face, huggingface dot co. Think of the forward deployed engineer role as a map, that is the analogy I like. So the key idea is this. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes.
+
+58
+1:10:18,000 --> 1:10:48,000
+Speaker 1: Think of the forward deployed engineer role as a translator, that is the analogy I like. Let me show you on the screen here. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. Does that make sense to everyone?
+
+59
+1:11:05,000 --> 1:11:35,000
+Speaker 1: Think of the forward deployed engineer role as a translator, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Does that make sense to everyone? Does that make sense to everyone?
+
+60
+1:12:05,000 --> 1:12:35,000
+Speaker 1: Think of the forward deployed engineer role as a library index, that is the analogy I like. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Let me fix that typo, it should be top underscore k not top k. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework.
+
+61
+1:12:55,000 --> 1:13:25,000
+Speaker 1: Does that make sense to everyone? A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Think of the forward deployed engineer role as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+62
+1:14:05,000 --> 1:14:35,000
+Speaker 1: A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of the forward deployed engineer role as a translator, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+63
+1:15:24,000 --> 1:15:54,000
+Speaker 1: We will use the LangChain docs as a reference, but you do not need the framework. Think of the forward deployed engineer role as a library index, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+64
+1:17:14,000 --> 1:17:44,000
+Speaker 1: Let me fix that typo, it should be top underscore k not top k. Let me fix that typo, it should be top underscore k not top k. Think of the forward deployed engineer role as a checklist, that is the analogy I like. A common mistake with the forward deployed engineer role is to skip measurement and trust vibes. An FDE sits with the customer, understands their data and workflow, and ships a working integration in weeks. You are half engineer, half consultant.
+
+65
+1:19:08,000 --> 1:19:38,000
+Speaker 2: Quick question, how do you pick the embedding model?
+
+66
+1:19:35,000 --> 1:20:05,000
+Speaker 1: Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+67
+1:20:06,000 --> 1:20:36,000
+Speaker 3: What if the customer's documents are scanned PDFs?
+
+68
+1:20:30,000 --> 1:21:00,000
+Speaker 1: Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+69
+1:21:07,000 --> 1:21:37,000
+Speaker 1: Okay, let's move on to prompt caching. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+70
+1:22:00,000 --> 1:22:30,000
+Speaker 1: Think of prompt caching as a translator, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this.
+
+71
+1:23:01,000 --> 1:23:31,000
+Speaker 1: You can find the models on Hugging Face, huggingface dot co. Think of prompt caching as a library index, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me show you on the screen here. A common mistake with prompt caching is to skip measurement and trust vibes.
+
+72
+1:24:34,000 --> 1:25:04,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Think of prompt caching as a translator, that is the analogy I like.
+
+73
+1:25:39,000 --> 1:26:09,000
+Speaker 1: Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Let me show you on the screen here. Think of prompt caching as a map, that is the analogy I like.
+
+74
+1:26:55,000 --> 1:27:25,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me show you on the screen here. Think of prompt caching as a translator, that is the analogy I like.
+
+75
+1:28:28,000 --> 1:28:58,000
+Speaker 1: A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Does that make sense to everyone? You can find the models on Hugging Face, huggingface dot co.
+
+76
+1:29:24,000 --> 1:29:54,000
+Speaker 1: Think of prompt caching as a library index, that is the analogy I like. So the key idea is this. You can find the models on Hugging Face, huggingface dot co. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes.
+
+77
+1:30:47,000 --> 1:31:17,000
+Speaker 1: Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a checklist, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. Does that make sense to everyone?
+
+78
+1:32:13,000 --> 1:32:43,000
+Speaker 1: Think of prompt caching as a checklist, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me fix that typo, it should be top underscore k not top k. You can find the models on Hugging Face, huggingface dot co.
+
+79
+1:34:02,000 --> 1:34:32,000
+Speaker 1: So the key idea is this. Think of prompt caching as a library index, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+80
+1:35:33,000 --> 1:36:03,000
+Speaker 1: Does that make sense to everyone? A common mistake with prompt caching is to skip measurement and trust vibes. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last. Let me fix that typo, it should be top underscore k not top k.
+
+81
+1:37:26,000 --> 1:37:56,000
+Speaker 1: In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. Think of prompt caching as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+82
+1:39:18,000 --> 1:39:48,000
+Speaker 1: Does that make sense to everyone? A common mistake with prompt caching is to skip measurement and trust vibes. You can find the models on Hugging Face, huggingface dot co. Think of prompt caching as a map, that is the analogy I like. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+83
+1:40:32,000 --> 1:41:02,000
+Speaker 1: I will put the notebook in the Slack channel after class. Let me fix that typo, it should be top underscore k not top k. Think of prompt caching as a map, that is the analogy I like. A common mistake with prompt caching is to skip measurement and trust vibes. Prompt caching reuses a stable prefix so repeated calls are cheaper. Put the system prompt and the big documents first, the question last.
+
+84
+1:41:22,000 --> 1:41:52,000
+Speaker 1: Okay, let's move on to tool use and agents. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+85
+1:42:41,000 --> 1:43:11,000
+Speaker 1: The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with tool use and agents is to skip measurement and trust vibes. So the key idea is this. Think of tool use and agents as a library index, that is the analogy I like.
+
+86
+1:44:38,000 --> 1:45:08,000
+Speaker 1: Think of tool use and agents as a library index, that is the analogy I like. Let me fix that typo, it should be top underscore k not top k. So the key idea is this. A common mistake with tool use and agents is to skip measurement and trust vibes. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+87
+1:45:50,000 --> 1:46:20,000
+Speaker 1: The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Let me fix that typo, it should be top underscore k not top k. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a translator, that is the analogy I like.
+
+88
+1:46:50,000 --> 1:47:20,000
+Speaker 1: Think of tool use and agents as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. You can find the models on Hugging Face, huggingface dot co. A common mistake with tool use and agents is to skip measurement and trust vibes. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+89
+1:48:33,000 --> 1:49:03,000
+Speaker 1: You can find the models on Hugging Face, huggingface dot co. Think of tool use and agents as a map, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Does that make sense to everyone? A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+90
+1:50:32,000 --> 1:51:02,000
+Speaker 1: A common mistake with tool use and agents is to skip measurement and trust vibes. Does that make sense to everyone? The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of tool use and agents as a checklist, that is the analogy I like.
+
+91
+1:51:31,000 --> 1:52:01,000
+Speaker 1: We will use the LangChain docs as a reference, but you do not need the framework. Think of tool use and agents as a checklist, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Let me fix that typo, it should be top underscore k not top k. A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+92
+1:52:16,000 --> 1:52:46,000
+Speaker 1: The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. I will put the notebook in the Slack channel after class. A common mistake with tool use and agents is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k. Think of tool use and agents as a map, that is the analogy I like.
+
+93
+1:53:49,000 --> 1:54:19,000
+Speaker 1: We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with tool use and agents is to skip measurement and trust vibes. We will use the LangChain docs as a reference, but you do not need the framework. Think of tool use and agents as a library index, that is the analogy I like. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments.
+
+94
+1:54:49,000 --> 1:55:19,000
+Speaker 1: A common mistake with tool use and agents is to skip measurement and trust vibes. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. You can find the models on Hugging Face, huggingface dot co. Think of tool use and agents as a library index, that is the analogy I like.
+
+95
+1:56:23,000 --> 1:56:53,000
+Speaker 1: I will put the notebook in the Slack channel after class. A common mistake with tool use and agents is to skip measurement and trust vibes. Does that make sense to everyone? The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Think of tool use and agents as a translator, that is the analogy I like.
+
+96
+1:57:14,000 --> 1:57:44,000
+Speaker 1: The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. You can find the models on Hugging Face, huggingface dot co. In the paper Attention Is All You Need they introduced the transformer, which is the architecture under all of this. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a checklist, that is the analogy I like.
+
+97
+1:58:23,000 --> 1:58:53,000
+Speaker 1: Let me show you on the screen here. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. Think of tool use and agents as a map, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework. A common mistake with tool use and agents is to skip measurement and trust vibes.
+
+98
+1:59:14,000 --> 1:59:44,000
+Speaker 1: I will put the notebook in the Slack channel after class. So the key idea is this. The model emits a structured tool call, your code runs it, and you return the result. Loop until the model stops asking for tools. Always validate the arguments. A common mistake with tool use and agents is to skip measurement and trust vibes. Think of tool use and agents as a map, that is the analogy I like.
+
+99
+2:00:20,000 --> 2:00:50,000
+Speaker 2: Quick question, how do you pick the embedding model?
+
+100
+2:00:50,000 --> 2:01:20,000
+Speaker 1: Good question. Start with a general model, measure recall on your golden set, and only switch if the numbers tell you to.
+
+101
+2:01:18,000 --> 2:01:48,000
+Speaker 3: What if the customer's documents are scanned PDFs?
+
+102
+2:01:43,000 --> 2:02:13,000
+Speaker 1: Then you need OCR before chunking, and you should expect noisier retrieval. Flag that as a risk early in the engagement.
+
+103
+2:02:07,000 --> 2:02:37,000
+Speaker 1: Okay, let's move on to deployment and observability. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed.
+
+104
+2:03:06,000 --> 2:03:36,000
+Speaker 1: Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. A common mistake with deployment and observability is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. Think of deployment and observability as a translator, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+105
+2:04:06,000 --> 2:04:36,000
+Speaker 1: Does that make sense to everyone? Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a checklist, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. So the key idea is this.
+
+106
+2:05:48,000 --> 2:06:18,000
+Speaker 1: A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a map, that is the analogy I like. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. I will put the notebook in the Slack channel after class. We will use the LangChain docs as a reference, but you do not need the framework.
+
+107
+2:06:55,000 --> 2:07:25,000
+Speaker 1: A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. We will use the LangChain docs as a reference, but you do not need the framework. Think of deployment and observability as a library index, that is the analogy I like. We will use the LangChain docs as a reference, but you do not need the framework.
+
+108
+2:07:42,000 --> 2:08:12,000
+Speaker 1: Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a map, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. I will put the notebook in the Slack channel after class. I will put the notebook in the Slack channel after class.
+
+109
+2:09:10,000 --> 2:09:40,000
+Speaker 1: Let me show you on the screen here. A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a map, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co.
+
+110
+2:10:06,000 --> 2:10:36,000
+Speaker 1: Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a checklist, that is the analogy I like. You can find the models on Hugging Face, huggingface dot co. I will put the notebook in the Slack channel after class. A common mistake with deployment and observability is to skip measurement and trust vibes.
+
+111
+2:10:53,000 --> 2:11:23,000
+Speaker 1: So the key idea is this. Think of deployment and observability as a library index, that is the analogy I like. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. I will put the notebook in the Slack channel after class. A common mistake with deployment and observability is to skip measurement and trust vibes.
+
+112
+2:12:28,000 --> 2:12:58,000
+Speaker 1: Let me fix that typo, it should be top underscore k not top k. Think of deployment and observability as a map, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+113
+2:13:32,000 --> 2:14:02,000
+Speaker 1: Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Think of deployment and observability as a library index, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Let me fix that typo, it should be top underscore k not top k. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed.
+
+114
+2:14:46,000 --> 2:15:16,000
+Speaker 1: Let me show you on the screen here. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. So the key idea is this. A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a translator, that is the analogy I like.
+
+115
+2:15:43,000 --> 2:16:13,000
+Speaker 1: Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Think of deployment and observability as a translator, that is the analogy I like. A common mistake with deployment and observability is to skip measurement and trust vibes. Does that make sense to everyone? Okay, the error says connection refused, that is because the vector database container is not running, let me start it.
+
+116
+2:16:56,000 --> 2:17:26,000
+Speaker 1: Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Let me show you on the screen here. A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a library index, that is the analogy I like.
+
+117
+2:18:12,000 --> 2:18:42,000
+Speaker 1: A common mistake with deployment and observability is to skip measurement and trust vibes. Think of deployment and observability as a checklist, that is the analogy I like. Okay, the error says connection refused, that is because the vector database container is not running, let me start it. Log every request with its token counts and latency. Trace retrieval separately from generation so you can tell which half failed. Let me fix that typo, it should be top underscore k not top k.
+
+118
+2:19:04,000 --> 2:19:34,000
+Speaker 1: Next week we will cover evaluation harnesses in depth and start the capstone project. See you Sunday.
