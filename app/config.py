@@ -27,6 +27,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "effort": "medium",               # low|medium|high|xhigh|max (Anthropic only)
     "openai_base_url": "",           # for openai_compatible (e.g. http://localhost:11434/v1)
     "max_concurrent_jobs": 2,
+    "concept_parallelism": 3,        # concept entries generated concurrently within one lecture job
     "chunk_words": 7000,             # transcript words per analysis chunk
     "spend_limit_usd_per_lecture": 15.0,
     "spend_limit_usd_total": 200.0,

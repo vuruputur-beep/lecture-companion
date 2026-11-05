@@ -327,6 +327,26 @@ def step_concept(ctx, provider, budget, meta, outline, oc, segments, vis, invent
     return d
 
 
+def step_all_concepts(ctx, provider, budget, meta, outline, segments, vis, inventories, force=False, parallelism=3) -> list[dict[str, Any]]:
+    """Generate every concept entry; independent concepts run concurrently (file checkpoints per concept)."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    ocs = outline["concepts"]
+    total = len(ocs)
+    results: dict[str, dict[str, Any]] = {}
+    done = 0
+    ctx.progress(0.34, f"Writing {total} concept entries ({parallelism} at a time)")
+    with ThreadPoolExecutor(max_workers=max(1, parallelism)) as ex:
+        futs = {ex.submit(step_concept, ctx, provider, budget, meta, outline, oc, segments, vis, inventories, force): oc for oc in ocs}
+        for fut in as_completed(futs):
+            oc = futs[fut]
+            results[oc["id"]] = fut.result()
+            done += 1
+            ctx.progress(0.34 + 0.5 * done / max(1, total), f"Concept {oc['number']}/{total} done: {oc['title']}")
+            ctx.checkpoint({"step": "concepts", "done": done, "total": total})
+    return [results[oc["id"]] for oc in ocs]
+
+
 # ---------------------------------------------------------------- mentions / wrapup
 
 def step_mentions(ctx, provider, budget, meta, inventories, force=False) -> dict[str, Any]:
@@ -540,12 +560,8 @@ def generate_notes(ctx: JobContext, params: dict[str, Any]) -> None:
     chunks = make_chunks(segments, int(cfg.get("chunk_words", 7000)))
     inventories = step_inventory(ctx, provider, budget, meta, chunks, vis, force=force)
     outline = step_outline(ctx, provider, budget, meta, inventories, force=force)
-    concepts: list[dict[str, Any]] = []
-    total = len(outline["concepts"])
-    for i, oc in enumerate(outline["concepts"]):
-        ctx.progress(0.34 + 0.5 * i / max(1, total), f"Concept {oc['number']}/{total}: {oc['title']}")
-        concepts.append(step_concept(ctx, provider, budget, meta, outline, oc, segments, vis, inventories, force=force))
-        ctx.checkpoint({"step": "concepts", "done": i + 1, "total": total})
+    concepts = step_all_concepts(ctx, provider, budget, meta, outline, segments, vis, inventories, force=force,
+                                 parallelism=int(cfg.get("concept_parallelism", 3)))
     mentions = step_mentions(ctx, provider, budget, meta, inventories, force=force)
     wrapup = step_wrapup(ctx, provider, budget, meta, concepts, inventories, force=force)
     ctx.progress(0.97, "Computing coverage report")

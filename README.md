@@ -50,7 +50,17 @@ Automated (`.venv/bin/python -m pytest`, 15 tests) and a scripted HTTP walk-thro
 
 ## Measured results
 
-See the **Jobs** page for per-call tokens, cost, and seconds on your own lectures. Fixture measurements are in the delivery notes; real lecture timings depend on the provider and model and are recorded per job, so no fixed speed is promised.
+See the **Jobs** page for per-call tokens, cost, and seconds on your own lectures. Measured on 2026-11-04 with the synthetic 1,689-word fixture (26 paragraphs, 7 concepts) using OpenAI `gpt-5` (the only reasoning model the available key exposed; no Anthropic key was present):
+
+| Metric | Value |
+|---|---|
+| Wall time (concepts sequential, before parallelisation) | 603 s |
+| Model calls | 11 (inventory 1, outline 1, concepts 7, mentions 1, wrap-up 1) |
+| Tokens | 23,806 in / 73,455 out (reasoning tokens included) |
+| Cost at list price | $0.77 |
+| Coverage | 26/26 paragraphs referenced, 0 gaps |
+
+Concept entries now run 3 at a time (Settings → `concept_parallelism`), which should cut wall time roughly in half. A full 4-hour lecture has not been benchmarked yet; extrapolating by chunk and concept count suggests tens of minutes and a few dollars per lecture, but treat that as an estimate until a real transcript has been run. Real lecture timings depend on the provider and model and are recorded per job, so no fixed speed is promised.
 
 Default model: Anthropic `claude-opus-5-5` (list price $4 / $20 per million tokens). A 4-hour lecture (~35k words) is roughly 50k input tokens per pass; with the inventory pass plus one call per concept the expected total is on the order of 300–500k input and 100–150k output tokens, i.e. a few dollars per lecture. Spending limits per lecture and in total are enforced in Settings; a job that hits the limit stops at a checkpoint and resumes when the limit is raised.
 

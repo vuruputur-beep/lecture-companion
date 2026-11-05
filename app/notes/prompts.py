@@ -48,7 +48,7 @@ Grouped brief mentions to fold in: {mentions}
 {visual_context}
 Produce every field of the schema with real content:
 - plain_explanation assuming no prior knowledge.
-- teaching_bullets: at least 10 meaningful bullets for a substantive concept (fewer only if the lecture genuinely has less; never pad). Each bullet is one teaching point, provenance-labelled, with refs for taught points.
+- teaching_bullets: at least 10 meaningful bullets for a substantive concept (fewer only if the lecture genuinely has less; never pad). For housekeeping/logistics or a non-substantive concept, 2-5 bullets, no analogy, and no interview questions. Each bullet is one teaching point, provenance-labelled, with refs for taught points.
 - definitions for every unfamiliar term used here.
 - why_it_matters, when_used, analogy plus analogy_limits, steps (step-by-step), examples (worked examples; include code/calculations the instructor showed - if code was only on screen and is not in the transcript, say so in a flag rather than inventing it; you may add a clearly 'additional' illustrative example), pitfalls (assumptions, tradeoffs, limitations, common mistakes), connections, deeper_explanation, fde_applications (how this applies to forward deployed engineering work with customers).
 - moments: demonstrations, troubleshooting, instructor corrections, useful student Q&A that occurred in this span, with refs.
