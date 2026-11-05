@@ -47,9 +47,11 @@ PRICES: dict[str, tuple[float, float, float, float]] = {
     "claude-sonnet-5": (2.0, 10.0, 0.20, 2.5),
     "claude-fable-5-1": (10.0, 50.0, 0.25, 12.5),
     "claude-haiku-4-5": (1.0, 5.0, 0.10, 1.25),
+    "gpt-5.2": (1.75, 14.0, 0.175, 0.0),
     "gpt-5": (1.25, 10.0, 0.125, 0.0),
     "gpt-5-mini": (0.25, 2.0, 0.025, 0.0),
     "gpt-4.1": (2.0, 8.0, 0.5, 0.0),
+    "gpt-4o-mini": (0.15, 0.60, 0.075, 0.0),
     "gpt-4o": (2.5, 10.0, 1.25, 0.0),
 }
 
@@ -163,9 +165,13 @@ class AnthropicProvider(Provider):
 class OpenAIProvider(Provider):
     name = "openai"
 
-    def __init__(self, model: str, base_url: str | None = None, compatible: bool = False, **kwargs: Any):
+    def __init__(self, model: str, base_url: str | None = None, compatible: bool = False, effort: str = "medium", **kwargs: Any):
         super().__init__(model, **kwargs)
         from openai import OpenAI
+
+        # Reasoning effort for gpt-5 family / o-series: minimal|low|medium|high
+        self.reasoning_effort = {"minimal": "minimal", "low": "low", "medium": "medium", "high": "high",
+                                 "xhigh": "high", "max": "high"}.get(effort, "medium")
 
         if compatible:
             self.name = "openai_compatible"
@@ -200,8 +206,10 @@ class OpenAIProvider(Provider):
             messages=[{"role": "system", "content": system}, {"role": "user", "content": content}],
             response_format={"type": "json_schema", "json_schema": {"name": "result", "schema": schema, "strict": not self.compatible}},
         )
-        if self.model.startswith(("gpt-5", "o1", "o3", "o4")):
+        if self.model.startswith(("gpt-5", "o1", "o3", "o4")) and not self.model.endswith("chat-latest"):
             kwargs["max_completion_tokens"] = max_tokens
+            if not self.compatible:
+                kwargs["reasoning_effort"] = self.reasoning_effort
         else:
             kwargs["max_tokens"] = min(max_tokens, 16384)
         try:
@@ -266,7 +274,7 @@ def get_provider(cfg: dict[str, Any] | None = None) -> Provider:
                                     "(or switch provider to OpenAI).")
         return AnthropicProvider(model, effort=cfg.get("effort", "medium"))
     if name == "openai":
-        return OpenAIProvider(model)
+        return OpenAIProvider(model, effort=cfg.get("effort", "medium"))
     if name == "openai_compatible":
-        return OpenAIProvider(model, base_url=cfg.get("openai_base_url") or None, compatible=True)
+        return OpenAIProvider(model, base_url=cfg.get("openai_base_url") or None, compatible=True, effort=cfg.get("effort", "medium"))
     raise ProviderError(f"Unknown provider '{name}'")

@@ -147,3 +147,60 @@ def attach_file(db, lecture: dbm.Lecture, filename: str, data: bytes) -> list[db
         out.append(sf)
     db.flush()
     return out
+
+
+def create_lecture_from_parts(db, *, course_name: str, title: str | None, week: int | None, lecture_date: str | None,
+                              parts: list[tuple[str, bytes]]) -> dbm.Lecture:
+    """Combine several transcript files (parts of one session, in upload order) into one lecture.
+    Each part keeps its own timestamps; segments carry `part` so citations stay honest ("pt2 P12 @0:05")."""
+    course = get_or_create_course(db, course_name)
+    lec = dbm.Lecture(course_id=course.id, title=title or "Untitled lecture", week=week, lecture_date=lecture_date)
+    db.add(lec)
+    db.flush()
+    lecture_dir(lec.id)
+    all_segments: list[dict[str, Any]] = []
+    formats: list[str] = []
+    warnings: list[str] = []
+    title_hint = date_hint = None
+    first_name = parts[0][0]
+    for pno, (filename, data) in enumerate(parts, start=1):
+        rel, path = store_source(lec.id, filename, data)
+        parsed, images = parse_file(path)
+        db.add(dbm.SourceFile(lecture_id=lec.id, kind="transcript", original_name=filename, stored_path=rel,
+                              size_bytes=len(data), meta={"format": parsed.format, "part": pno}))
+        pj = parsed.to_json()
+        for seg in pj["segments"]:
+            seg["part"] = pno if len(parts) > 1 else None
+            all_segments.append(seg)
+        formats.append(parsed.format)
+        warnings += parsed.warnings
+        title_hint = title_hint or parsed.title_hint
+        date_hint = date_hint or parsed.date_hint
+        for im in images:
+            rel_img, _ = store_image(lec.id, im["name"], im["bytes"])
+            db.add(dbm.SourceFile(lecture_id=lec.id, kind="image", original_name=im["name"], stored_path=rel_img,
+                                  mime=im.get("content_type"), size_bytes=len(im["bytes"]),
+                                  meta={"from": filename, "page": im.get("page"), "paragraph_index": im.get("paragraph_index"), "part": pno}))
+    for i, seg in enumerate(all_segments):
+        seg["idx"], seg["pid"] = i, f"P{i + 1}"
+    from .parsers.transcript import ParsedTranscript, Segment
+    pt = ParsedTranscript(format="+".join(formats), warnings=warnings, title_hint=title_hint, date_hint=date_hint)
+    pt.segments = [Segment(**{k: v for k, v in seg.items() if k != "part"}) for seg in all_segments]
+    tj = pt.to_json()
+    for seg, src in zip(tj["segments"], all_segments):
+        seg["part"] = src["part"]
+    tj["parts"] = [{"part": i + 1, "file": name, "segments": sum(1 for x in all_segments if x["part"] in (i + 1, None))} for i, (name, _) in enumerate(parts)]
+    tj["duration_seconds"] = None if len(parts) > 1 else tj["duration_seconds"]  # per-part clocks: no combined duration is claimed
+    lec.transcript_json = tj
+    lec.source_assessment = assess_source(pt)
+    lec.source_assessment["notes"].insert(0, f"Combined from {len(parts)} files in upload order; timestamps restart in each part.")
+    lec.source_kind = lec.source_assessment["kind"]
+    if not title:
+        lec.title = guess_title(first_name, title_hint)
+    if week is None:
+        lec.week = guess_week(lec.title) or guess_week(first_name)
+    if not lecture_date:
+        lec.lecture_date = guess_date(date_hint) or guess_date(first_name)
+    lec.order_index = db.query(dbm.Lecture).filter(dbm.Lecture.course_id == course.id).count()
+    db.flush()
+    return lec

@@ -85,3 +85,18 @@ def delete_lecture_files(lecture_id: str, originals: bool = True, generated: boo
 
 def dir_size(path: Path) -> int:
     return sum(f.stat().st_size for f in path.rglob("*") if f.is_file()) if path.exists() else 0
+
+
+def read_drafts(lecture_id: str) -> dict:
+    p = lecture_dir(lecture_id) / "drafts.json"
+    try:
+        return json.loads(p.read_text()) if p.exists() else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def write_drafts(lecture_id: str, drafts: dict) -> None:
+    p = lecture_dir(lecture_id) / "drafts.json"
+    tmp = p.with_suffix(".tmp")
+    tmp.write_text(json.dumps(drafts, ensure_ascii=False, indent=1))
+    tmp.replace(p)

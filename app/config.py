@@ -22,9 +22,9 @@ DB_PATH = DATA_DIR / "app.db"
 
 DEFAULT_CONFIG: dict[str, Any] = {
     # AI provider: "anthropic" | "openai" | "openai_compatible"
-    "provider": "anthropic",
-    "model": "claude-opus-5-5",
-    "effort": "medium",               # low|medium|high|xhigh|max (Anthropic only)
+    "provider": "openai",
+    "model": "gpt-5",
+    "effort": "low",                  # minimal|low|medium|high (OpenAI gpt-5) · low..max (Anthropic)
     "openai_base_url": "",           # for openai_compatible (e.g. http://localhost:11434/v1)
     "max_concurrent_jobs": 2,
     "concept_parallelism": 3,        # concept entries generated concurrently within one lecture job

@@ -50,10 +50,21 @@ class Course(Base):
     lectures: Mapped[list["Lecture"]] = relationship(back_populates="course")
 
 
+class Folder(Base):
+    """User-defined folders (nestable) for sorting lectures."""
+    __tablename__ = "folders"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String)
+    parent_id: Mapped[str | None] = mapped_column(ForeignKey("folders.id"), nullable=True)
+    order_index: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+
+
 class Lecture(Base):
     __tablename__ = "lectures"
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_id)
     course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"))
+    folder_id: Mapped[str | None] = mapped_column(String, nullable=True)
     title: Mapped[str] = mapped_column(String)
     week: Mapped[int | None] = mapped_column(Integer, nullable=True)
     lecture_date: Mapped[str | None] = mapped_column(String, nullable=True)  # ISO date
@@ -131,12 +142,28 @@ class Annotation(Base):
     __tablename__ = "annotations"
     id: Mapped[str] = mapped_column(String, primary_key=True, default=new_id)
     lecture_id: Mapped[str] = mapped_column(ForeignKey("lectures.id"))
-    kind: Mapped[str] = mapped_column(String)  # bookmark | note | review | practiced
+    kind: Mapped[str] = mapped_column(String)  # bookmark | note | review | practiced | explanation
     anchor: Mapped[str] = mapped_column(String)  # element id within the lecture page
     anchor_label: Mapped[str] = mapped_column(String, default="")
     body: Mapped[str] = mapped_column(Text, default="")
+    quote: Mapped[str] = mapped_column(Text, default="")  # the selected passage this note/explanation is about
+    mode: Mapped[str] = mapped_column(String, default="")  # explain | simpler | example | why (for explanations)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
     lecture: Mapped[Lecture] = relationship(back_populates="annotations")
+
+
+class StudyGuide(Base):
+    """A cross-lecture study guide built from two or more lectures' notes."""
+    __tablename__ = "study_guides"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_id)
+    title: Mapped[str] = mapped_column(String)
+    lecture_ids: Mapped[list] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String, default="queued")  # queued|processing|ready|failed
+    guide_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
 
 
 class ApiCallLog(Base):
@@ -185,6 +212,14 @@ def init_db() -> None:
     engine = get_engine()
     Base.metadata.create_all(engine)
     with engine.begin() as conn:
+        # lightweight migrations for columns added after the first release
+        cols = {r[1] for r in conn.execute(text("PRAGMA table_info(annotations)")).fetchall()}
+        for col, ddl in (("quote", "TEXT DEFAULT ''"), ("mode", "VARCHAR DEFAULT ''")):
+            if col not in cols:
+                conn.execute(text(f"ALTER TABLE annotations ADD COLUMN {col} {ddl}"))
+        lcols = {r[1] for r in conn.execute(text("PRAGMA table_info(lectures)")).fetchall()}
+        if "folder_id" not in lcols:
+            conn.execute(text("ALTER TABLE lectures ADD COLUMN folder_id VARCHAR"))
         conn.execute(text(
             "CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5("
             "lecture_id UNINDEXED, kind UNINDEXED, anchor UNINDEXED, title, body, tokenize='porter unicode61')"

@@ -71,3 +71,32 @@ li.annotatable.has-bookmark::before,li.annotatable.has-review::before{left:-40px
 body.focus .topbar,body.focus .jobbar,body.focus .toc,body.focus .tabs,body.focus .foot,body.focus .toolbar>*:not(#focusBtn):not(#timerBtn){display:none}
 body.focus .notes{grid-template-columns:1fr}body.focus .reading{margin:0 auto;font-size:1.12rem;line-height:1.7}body.focus .container{max-width:860px}
 @media (max-width:900px){.notes{grid-template-columns:1fr}.toc{position:static;max-height:none}.topbar{flex-wrap:wrap}.topbar nav{order:3;width:100%;flex-wrap:wrap}}
+
+.breath{font-size:1.08rem;background:var(--accent-soft);padding:10px 14px;border-radius:8px;margin:8px 0 12px}
+.foundations details{border:1px solid var(--rule);border-radius:8px;padding:8px 12px;margin:6px 0;background:var(--card)}.foundations summary{cursor:pointer}
+ol.flow li{margin:6px 0}
+.term{border-bottom:1px dotted var(--accent);cursor:help;position:relative}
+.term-tip{position:absolute;z-index:50;background:var(--card);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:8px 12px;max-width:340px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.18);line-height:1.45}
+
+details.regen{margin:10px 0 4px;font-size:.85rem}details.regen>summary{cursor:pointer;color:var(--muted)}details.regen>summary:hover{color:var(--accent)}
+details.regen form{margin-top:6px;padding:8px 10px;background:var(--bg);border:1px dashed var(--rule);border-radius:8px}details.regen input[type=text]{min-width:220px}
+
+.seltool button{white-space:nowrap}
+mark.hl{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.explanation{font-size:.92rem;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:6px;padding:8px 12px;margin:8px 0}
+.explanation .q{font-size:.8rem;color:var(--muted);font-style:italic;margin-bottom:4px}.explanation .tag{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-right:6px}
+.explanation p{margin:.3em 0}.explanation code{font-size:.85em}.explanation .del{float:right}
+.user-note .q{display:block;font-size:.8rem;color:var(--muted);font-style:italic}
+.busy{opacity:.6;pointer-events:none}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:80vw}
+.upload-status{margin-top:12px}
+details.folder{border:1px solid var(--rule);border-radius:var(--radius);background:var(--card);margin:10px 0;padding:0}
+details.folder>summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}details.folder>summary::-webkit-details-marker{display:none}
+details.folder .fname{font-weight:600;font-size:1.05rem}details.folder .folder-actions{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;opacity:.35}details.folder>summary:hover .folder-actions{opacity:1}
+details.folder .folder-actions input{width:auto;padding:3px 6px;font-size:.8rem}details.folder .folder-body{padding:4px 14px 12px}details.folder details.folder{margin-left:14px}
+.movef{margin-top:8px}.movef select{font-size:.78rem;padding:3px 6px}.muted-h{color:var(--muted);font-size:1.1rem;margin-top:28px}
+
+.lecture-card .cardlink{display:block;color:var(--ink)}.lecture-card .cardlink:hover{text-decoration:none}.lecture-card .cardlink h4{margin:6px 0}
+.movef{display:flex;align-items:center;gap:6px}.folderf select{font-size:.9rem;padding:6px 8px;width:auto;max-width:220px}
+.draft-status{margin-left:8px}

@@ -153,7 +153,7 @@ def test_summary_source_produces_insufficiency_note():
 
 def test_search_index(lecture_id):
     with dbm.session() as s:
-        res = dbm.search(s, "retrieval augmented")
+        res = dbm.search(s, "retrieval augmented", lecture_id)
         assert res and any(r["kind"] == "transcript" for r in res)
 
 

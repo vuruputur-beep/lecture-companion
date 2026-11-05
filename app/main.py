@@ -15,19 +15,21 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from . import db as dbm
 from . import importer
 from .config import SECRET_KEYS, load_config, save_config, secret_status, set_secret
-from .exporters import export_all, export_docx, export_pdf, render_html, render_markdown
+from .exporters import export_all, export_docx, export_guide, export_pdf, render_html, render_markdown
 from .jobs.runner import runner
-from .notes import pipeline  # noqa: F401  (registers job handlers)
+from .notes import pipeline  # registers job handlers; also version-history helpers
 from .notes.schema import LectureNotes
 from .parsers.transcript import format_timestamp
 from .providers import ProviderError, get_provider
-from .storage import delete_lecture_files, dir_size, lecture_dir
+from .storage import delete_lecture_files, dir_size, lecture_dir, read_drafts, write_drafts
+from .config import DATA_DIR
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("lc.web")
@@ -72,6 +74,45 @@ def _get_lecture(s, lecture_id: str) -> dbm.Lecture:
 
 # ----------------------------------------------------------------- dashboard
 
+def _folder_tree(s) -> list[dict[str, Any]]:
+    folders = s.scalars(select(dbm.Folder).order_by(dbm.Folder.order_index, dbm.Folder.name)).all()
+    lectures = s.scalars(select(dbm.Lecture).options(selectinload(dbm.Lecture.course)).where(dbm.Lecture.folder_id.isnot(None))
+                         .order_by(dbm.Lecture.week, dbm.Lecture.order_index)).all()
+    by_parent: dict[str | None, list] = {}
+    for f in folders:
+        by_parent.setdefault(f.parent_id, []).append(f)
+    lec_by_folder: dict[str, list] = {}
+    for l in lectures:
+        lec_by_folder.setdefault(l.folder_id, []).append(l)
+
+    def build(parent_id, depth=0):
+        out = []
+        for f in by_parent.get(parent_id, []):
+            if depth > 6:
+                break
+            out.append({"folder": f, "lectures": lec_by_folder.get(f.id, []), "children": build(f.id, depth + 1), "depth": depth})
+        return out
+    return build(None)
+
+
+def _folder_choices(s) -> list[tuple[str, str]]:
+    """(id, indented path name) for selects."""
+    folders = s.scalars(select(dbm.Folder).order_by(dbm.Folder.order_index, dbm.Folder.name)).all()
+    by_parent: dict[str | None, list] = {}
+    for f in folders:
+        by_parent.setdefault(f.parent_id, []).append(f)
+    out: list[tuple[str, str]] = []
+
+    def walk(pid, prefix, depth=0):
+        for f in by_parent.get(pid, []):
+            if depth > 6:
+                break
+            out.append((f.id, prefix + f.name))
+            walk(f.id, prefix + f.name + " / ", depth + 1)
+    walk(None, "")
+    return out
+
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     with dbm.session() as s:
@@ -80,13 +121,71 @@ def dashboard(request: Request):
         for c in courses:
             weeks: dict[Any, list] = {}
             for lec in sorted(c.lectures, key=lambda l: ((l.week or 999), l.lecture_date or "", l.order_index)):
+                if lec.folder_id:
+                    continue  # shown under its folder instead
                 weeks.setdefault(lec.week, []).append(lec)
-            data.append({"course": c, "weeks": sorted(weeks.items(), key=lambda kv: (kv[0] is None, kv[0] or 0))})
+            if weeks:
+                data.append({"course": c, "weeks": sorted(weeks.items(), key=lambda kv: (kv[0] is None, kv[0] or 0))})
         recent = s.scalars(select(dbm.Lecture).where(dbm.Lecture.last_opened_at.isnot(None))
                            .order_by(dbm.Lecture.last_opened_at.desc()).limit(1)).first()
-        recent_jobs = s.scalars(select(dbm.Job).order_by(dbm.Job.created_at.desc()).limit(8)).all()
         totals = {"lectures": s.query(dbm.Lecture).count(), "cost": sum(l.cost_usd or 0 for c in courses for l in c.lectures)}
-        return templates.TemplateResponse(request, "dashboard.html", _ctx(request, courses=data, resume=recent, recent_jobs=recent_jobs, totals=totals))
+        tree = _folder_tree(s)
+        choices = _folder_choices(s)
+        return templates.TemplateResponse(request, "dashboard.html", _ctx(request, courses=data, resume=recent, totals=totals,
+                                                                            tree=tree, folder_choices=choices))
+
+
+# ----------------------------------------------------------------- folders
+
+@app.post("/folders")
+def folder_create(name: str = Form(...), parent_id: str = Form("")):
+    name = name.strip()[:80]
+    if not name:
+        raise HTTPException(400)
+    with dbm.session() as s:
+        parent = s.get(dbm.Folder, parent_id) if parent_id else None
+        f = dbm.Folder(name=name, parent_id=parent.id if parent else None,
+                       order_index=s.query(dbm.Folder).count())
+        s.add(f)
+        s.commit()
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/folders/{folder_id}/rename")
+def folder_rename(folder_id: str, name: str = Form(...)):
+    with dbm.session() as s:
+        f = s.get(dbm.Folder, folder_id)
+        if not f:
+            raise HTTPException(404)
+        f.name = name.strip()[:80] or f.name
+        s.commit()
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/folders/{folder_id}/delete")
+def folder_delete(folder_id: str):
+    """Delete a folder; its lectures and sub-folders move up to the parent (never deleted)."""
+    with dbm.session() as s:
+        f = s.get(dbm.Folder, folder_id)
+        if not f:
+            raise HTTPException(404)
+        for l in s.scalars(select(dbm.Lecture).where(dbm.Lecture.folder_id == folder_id)).all():
+            l.folder_id = f.parent_id
+        for child in s.scalars(select(dbm.Folder).where(dbm.Folder.parent_id == folder_id)).all():
+            child.parent_id = f.parent_id
+        s.delete(f)
+        s.commit()
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/lectures/{lecture_id}/move")
+def lecture_move(request: Request, lecture_id: str, folder_id: str = Form("")):
+    with dbm.session() as s:
+        lec = _get_lecture(s, lecture_id)
+        lec.folder_id = folder_id if folder_id and s.get(dbm.Folder, folder_id) else None
+        s.commit()
+    back = request.headers.get("referer") or f"/lectures/{lecture_id}"
+    return RedirectResponse(back if back.startswith("http://127.0.0.1") or back.startswith("/") else "/", status_code=303)
 
 
 # ----------------------------------------------------------------- import
@@ -99,18 +198,33 @@ def import_form(request: Request):
     cfg = load_config()
     if cfg["default_course"] not in names:
         names.insert(0, cfg["default_course"])
-    return templates.TemplateResponse(request, "import.html", _ctx(request, course_names=names))
+    with dbm.session() as s:
+        choices = _folder_choices(s)
+    return templates.TemplateResponse(request, "import.html", _ctx(request, course_names=names, folder_choices=choices))
 
 
 @app.post("/import")
 async def import_submit(request: Request, course: str = Form(...), week: str = Form(""), lecture_date: str = Form(""),
-                        title: str = Form(""), pasted: str = Form(""),
+                        title: str = Form(""), pasted: str = Form(""), combine: str = Form(""), folder_id: str = Form(""),
                         transcripts: list[UploadFile] = File(default=[]), attachments: list[UploadFile] = File(default=[])):
     week_val = int(week) if week.strip().isdigit() else None
     created: list[str] = []
     errors: list[str] = []
     with dbm.session() as s:
         files = [f for f in transcripts if f.filename]
+        if combine and len(files) > 1:
+            parts = []
+            for up in files:
+                data = await up.read()
+                if Path(up.filename).suffix.lower() in importer.TRANSCRIPT_EXTS and data:
+                    parts.append((up.filename, data))
+                else:
+                    errors.append(f"{up.filename}: skipped (unsupported type)")
+            if parts:
+                lec = importer.create_lecture_from_parts(s, course_name=course, title=title.strip() or None, week=week_val,
+                                                         lecture_date=lecture_date or None, parts=parts)
+                created.append(lec.id)
+            files = []
         for i, up in enumerate(files):
             data = await up.read()
             if not data:
@@ -132,6 +246,9 @@ async def import_submit(request: Request, course: str = Form(...), week: str = F
                 s, course_name=course, title=(title.strip() or None), week=week_val, lecture_date=lecture_date or None,
                 filename=None, data=None, pasted_text=pasted)
             created.append(lec.id)
+        if folder_id and s.get(dbm.Folder, folder_id):
+            for lid in created:
+                s.get(dbm.Lecture, lid).folder_id = folder_id
         # attachments go to the single created lecture, or to the first one when several
         atts = [f for f in attachments if f.filename]
         if atts and created:
@@ -203,12 +320,23 @@ def lecture_page(request: Request, lecture_id: str, view: str = "notes"):
             lec.study_state = "read"
         s.commit()
         notes = lec.notes_json
-        anns = [{"id": a.id, "kind": a.kind, "anchor": a.anchor, "anchor_label": a.anchor_label, "body": a.body} for a in lec.annotations]
+        anns = [{"id": a.id, "kind": a.kind, "anchor": a.anchor, "anchor_label": a.anchor_label, "body": a.body, "quote": a.quote or "", "mode": a.mode or ""} for a in lec.annotations]
         last_job = sorted(lec.jobs, key=lambda j: j.created_at)[-1] if lec.jobs else None
         images = {im["id"]: im for im in (notes or {}).get("images", [])}
+        choices = _folder_choices(s)
+        drafts = read_drafts(lecture_id)
+        # when editing, prefill from drafts so unpublished work is what you see
+        edit_notes = notes
+        if view == "edit" and notes and drafts:
+            edit_notes = copy.deepcopy(notes)
+            for sec, d in drafts.items():
+                try:
+                    apply_section_edit(edit_notes, sec, d["fields"])
+                except HTTPException:
+                    continue
         return templates.TemplateResponse(request, "lecture.html", _ctx(
-            request, lec=lec, notes=notes, transcript=lec.transcript_json or {}, annotations=anns, last_job=last_job,
-            view=view, images=images, files=lec.files, assessment=lec.source_assessment or {}))
+            request, lec=lec, notes=notes, edit_notes=edit_notes, drafts=drafts, transcript=lec.transcript_json or {}, annotations=anns, last_job=last_job,
+            view=view, images=images, files=lec.files, assessment=lec.source_assessment or {}, folder_choices=choices))
 
 
 def _ldir(lecture_id: str) -> Path:
@@ -263,11 +391,16 @@ def lecture_generate(lecture_id: str, force: str = Form("")):
 async def lecture_regenerate(request: Request, lecture_id: str):
     form = await request.form()
     sections = [str(v) for k, v in form.multi_items() if k == "sections"]
+    part = str(form.get("part", "")).strip()
+    if part and sections and sections[0].startswith("concept:") and sections[0].count(":") == 1 and part != "whole":
+        sections = [f"{sections[0]}:{part}"]
     overwrite = bool(form.get("overwrite_edits"))
+    instruction = str(form.get("instruction", ""))[:600]
     if not sections:
         return RedirectResponse(f"/lectures/{lecture_id}?view=edit", status_code=303)
-    runner.enqueue(lecture_id, "regenerate_sections", {"sections": sections, "overwrite_edits": overwrite})
-    return RedirectResponse(f"/lectures/{lecture_id}", status_code=303)
+    runner.enqueue(lecture_id, "regenerate_sections", {"sections": sections, "overwrite_edits": overwrite, "instruction": instruction})
+    anchor = f"#concept-{sections[0].split(':')[1]}" if sections[0].startswith("concept:") else f"#{sections[0]}"
+    return RedirectResponse(f"/lectures/{lecture_id}{anchor}", status_code=303)
 
 
 @app.post("/lectures/{lecture_id}/state")
@@ -308,7 +441,7 @@ def lecture_delete(lecture_id: str, what: str = Form("all")):
 
 # ----------------------------------------------------------------- editing
 
-EDITABLE_CONCEPT_FIELDS = ["title", "plain_explanation", "teaching_bullets", "definitions", "why_it_matters", "when_used", "analogy",
+EDITABLE_CONCEPT_FIELDS = ["title", "in_one_breath", "plain_explanation", "teaching_bullets", "definitions", "why_it_matters", "when_used", "analogy",
                            "analogy_limits", "steps", "connections", "deeper_explanation", "fde_applications"]
 
 
@@ -316,68 +449,128 @@ def _lines(v: str) -> list[str]:
     return [x.strip() for x in v.replace("\r\n", "\n").split("\n") if x.strip()]
 
 
-@app.post("/lectures/{lecture_id}/edit/{section}")
-async def lecture_edit(request: Request, lecture_id: str, section: str):
-    form = await request.form()
+def apply_section_edit(notes: dict[str, Any], section: str, form: dict[str, str]) -> None:
+    """Apply edited form fields to the notes model in place."""
+    if section == "overview":
+        ov = notes["overview"]
+        ov["introduction"] = str(form.get("introduction", ov["introduction"]))
+        ov["learning_objectives"] = _lines(str(form.get("learning_objectives", "")))
+        ov["prerequisites"] = _lines(str(form.get("prerequisites", "")))
+        ov["takeaways"] = []
+        for line in _lines(str(form.get("takeaways", ""))):
+            refs = re.findall(r"⟨([^⟩]+)⟩", line)
+            ov["takeaways"].append({"text": re.sub(r"\s*⟨[^⟩]+⟩", "", line).strip(), "provenance": "taught",
+                                    "refs": [r.strip() for r in ",".join(refs).split(",") if r.strip()]})
+        ov["user_edited_fields"] = ["introduction", "learning_objectives", "prerequisites", "takeaways"]
+    elif section == "summary":
+        sm = notes["summary"]
+        sm["main_lessons"] = _lines(str(form.get("main_lessons", "")))
+        sm["how_they_connect"] = str(form.get("how_they_connect", ""))
+        sm["suggested_next_steps"] = _lines(str(form.get("suggested_next_steps", "")))
+        sm["user_edited_fields"] = ["main_lessons", "how_they_connect", "suggested_next_steps"]
+    elif section.startswith("concept:"):
+        cid = section.split(":", 1)[1]
+        c = next((c for c in notes["concepts"] if c["id"] == cid), None)
+        if not c:
+            raise HTTPException(404)
+        edited = set(c.get("user_edited_fields", []))
+        for f in EDITABLE_CONCEPT_FIELDS:
+            if f not in form:
+                continue
+            v = str(form.get(f))
+            if f in ("teaching_bullets", "fde_applications"):
+                new = []
+                for line in _lines(v):
+                    prov = "taught"
+                    m = re.match(r"^\[(T|A|\?)\]\s*(.*)$", line)
+                    if m:
+                        prov = {"T": "taught", "A": "additional", "?": "needs_verification"}[m.group(1)]
+                        line = m.group(2)
+                    refs = re.findall(r"⟨([^⟩]+)⟩", line)
+                    line = re.sub(r"\s*⟨[^⟩]+⟩", "", line).strip()
+                    new.append({"text": line, "provenance": prov, "refs": [r.strip() for r in ",".join(refs).split(",") if r.strip()]})
+                c[f] = new
+            elif f == "definitions":
+                new = []
+                for line in _lines(v):
+                    term, _, definition = line.partition(" - ")
+                    new.append({"term": term.strip().strip("*"), "definition": definition.strip(), "provenance": "taught", "refs": []})
+                c[f] = new
+            elif f == "steps":
+                c[f] = [re.sub(r"^\d+[.)]\s*", "", x) for x in _lines(v)]
+            else:
+                c[f] = v.strip()
+            edited.add(f)
+        c["user_edited_fields"] = sorted(edited)
+    else:
+        raise HTTPException(400, "Unknown section")
+
+
+def _publish(lecture_id: str, section: str, fields: dict[str, str]) -> None:
     with dbm.session() as s:
         lec = _get_lecture(s, lecture_id)
         notes = copy.deepcopy(lec.notes_json or {})  # deep copy: SQLAlchemy only persists a changed value
         if not notes:
             raise HTTPException(400, "No notes to edit")
-        if section == "overview":
-            ov = notes["overview"]
-            ov["introduction"] = str(form.get("introduction", ov["introduction"]))
-            ov["learning_objectives"] = _lines(str(form.get("learning_objectives", "")))
-            ov["prerequisites"] = _lines(str(form.get("prerequisites", "")))
-            ov["takeaways"] = [{"text": t, "provenance": "taught", "refs": []} if not isinstance(t, dict) else t for t in _lines(str(form.get("takeaways", "")))]
-            ov["user_edited_fields"] = ["introduction", "learning_objectives", "prerequisites", "takeaways"]
-        elif section == "summary":
-            sm = notes["summary"]
-            sm["main_lessons"] = _lines(str(form.get("main_lessons", "")))
-            sm["how_they_connect"] = str(form.get("how_they_connect", ""))
-            sm["suggested_next_steps"] = _lines(str(form.get("suggested_next_steps", "")))
-            sm["user_edited_fields"] = ["main_lessons", "how_they_connect", "suggested_next_steps"]
-        elif section.startswith("concept:"):
-            cid = section.split(":", 1)[1]
-            c = next((c for c in notes["concepts"] if c["id"] == cid), None)
-            if not c:
-                raise HTTPException(404)
-            edited = set(c.get("user_edited_fields", []))
-            for f in EDITABLE_CONCEPT_FIELDS:
-                if f not in form:
-                    continue
-                v = str(form.get(f))
-                if f in ("teaching_bullets", "fde_applications"):
-                    new = []
-                    for line in _lines(v):
-                        prov = "taught"
-                        m = re.match(r"^\[(T|A|\?)\]\s*(.*)$", line)
-                        if m:
-                            prov = {"T": "taught", "A": "additional", "?": "needs_verification"}[m.group(1)]
-                            line = m.group(2)
-                        refs = re.findall(r"⟨([^⟩]+)⟩", line)
-                        line = re.sub(r"\s*⟨[^⟩]+⟩", "", line).strip()
-                        new.append({"text": line, "provenance": prov, "refs": [r.strip() for r in ",".join(refs).split(",") if r.strip()]})
-                    c[f] = new
-                elif f == "definitions":
-                    new = []
-                    for line in _lines(v):
-                        term, _, definition = line.partition(" - ")
-                        new.append({"term": term.strip().strip("*"), "definition": definition.strip(), "provenance": "taught", "refs": []})
-                    c[f] = new
-                elif f == "steps":
-                    c[f] = [re.sub(r"^\d+[.)]\s*", "", x) for x in _lines(v)]
-                else:
-                    c[f] = v.strip()
-                edited.add(f)
-            c["user_edited_fields"] = sorted(edited)
-        else:
-            raise HTTPException(400, "Unknown section")
+        apply_section_edit(notes, section, fields)
         LectureNotes.model_validate(notes)  # keep the model consistent
         lec.notes_json = notes
         lec.updated_at = dbm.now()
         dbm.reindex_lecture(s, lec)
         s.commit()
+    drafts = read_drafts(lecture_id)
+    if section in drafts:
+        del drafts[section]
+        write_drafts(lecture_id, drafts)
+
+
+@app.post("/lectures/{lecture_id}/edit/{section}")
+async def lecture_edit(request: Request, lecture_id: str, section: str):
+    """action=draft saves without changing the notes; action=publish (default) applies the edit."""
+    form = await request.form()
+    fields = {k: str(v) for k, v in form.items() if k not in ("action",)}
+    action = str(form.get("action", "publish"))
+    if action == "draft":
+        drafts = read_drafts(lecture_id)
+        drafts[section] = {"fields": fields, "saved_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        write_drafts(lecture_id, drafts)
+        return RedirectResponse(f"/lectures/{lecture_id}?view=edit#edit-{section.replace(':', '-')}", status_code=303)
+    if action == "discard":
+        drafts = read_drafts(lecture_id)
+        drafts.pop(section, None)
+        write_drafts(lecture_id, drafts)
+        return RedirectResponse(f"/lectures/{lecture_id}?view=edit#edit-{section.replace(':', '-')}", status_code=303)
+    _publish(lecture_id, section, fields)
+    anchor = f"#concept-{section.split(':', 1)[1]}" if section.startswith("concept:") else f"#{section}"
+    return RedirectResponse(f"/lectures/{lecture_id}{anchor}", status_code=303)
+
+
+@app.post("/api/lectures/{lecture_id}/drafts/{section}")
+async def api_draft_save(lecture_id: str, section: str, request: Request):
+    """Autosave from the editor (JSON {field: value})."""
+    body = await request.json()
+    fields = {str(k): str(v) for k, v in dict(body).items() if k != "action"}
+    drafts = read_drafts(lecture_id)
+    drafts[section] = {"fields": fields, "saved_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    write_drafts(lecture_id, drafts)
+    return {"ok": True, "saved_at": drafts[section]["saved_at"]}
+
+
+@app.delete("/api/lectures/{lecture_id}/drafts/{section}")
+def api_draft_discard(lecture_id: str, section: str):
+    drafts = read_drafts(lecture_id)
+    drafts.pop(section, None)
+    write_drafts(lecture_id, drafts)
+    return {"ok": True}
+
+
+@app.post("/lectures/{lecture_id}/drafts/{section}/publish")
+def draft_publish(lecture_id: str, section: str):
+    drafts = read_drafts(lecture_id)
+    d = drafts.get(section)
+    if not d:
+        raise HTTPException(404, "No draft")
+    _publish(lecture_id, section, d["fields"])
     anchor = f"#concept-{section.split(':', 1)[1]}" if section.startswith("concept:") else f"#{section}"
     return RedirectResponse(f"/lectures/{lecture_id}{anchor}", status_code=303)
 
@@ -400,7 +593,30 @@ async def api_position(lecture_id: str, request: Request):
 def api_annotations(lecture_id: str):
     with dbm.session() as s:
         anns = s.scalars(select(dbm.Annotation).where(dbm.Annotation.lecture_id == lecture_id)).all()
-        return [{"id": a.id, "kind": a.kind, "anchor": a.anchor, "anchor_label": a.anchor_label, "body": a.body} for a in anns]
+        return [{"id": a.id, "kind": a.kind, "anchor": a.anchor, "anchor_label": a.anchor_label, "body": a.body, "quote": a.quote or "", "mode": a.mode or ""} for a in anns]
+
+
+@app.post("/api/lectures/{lecture_id}/explain")
+async def api_explain(lecture_id: str, request: Request):
+    """Explain / simplify / exemplify a selected passage; saves the result as an 'explanation' annotation."""
+    body = await request.json()
+    quote = str(body.get("quote", "")).strip()
+    anchor = str(body.get("anchor", ""))[:120]
+    mode = str(body.get("mode", "explain"))
+    if len(quote) < 3:
+        raise HTTPException(400, "Select some text first")
+    try:
+        res = await run_in_threadpool(pipeline.explain_selection, lecture_id, quote, anchor, mode)
+    except ProviderError as e:
+        raise HTTPException(502, str(e))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"{type(e).__name__}: {e}")
+    with dbm.session() as s:
+        a = dbm.Annotation(lecture_id=lecture_id, kind="explanation", anchor=anchor, anchor_label=quote[:200],
+                           body=res["explanation"][:8000], quote=quote[:2000], mode=mode)
+        s.add(a)
+        s.commit()
+        return {"ok": True, "id": a.id, "explanation": res["explanation"], "cost_usd": res["cost_usd"], "seconds": res["seconds"], "mode": mode}
 
 
 @app.post("/api/lectures/{lecture_id}/annotations")
@@ -418,7 +634,8 @@ async def api_annotation_create(lecture_id: str, request: Request):
                 s.commit()
                 return {"ok": True, "removed": True}
         a = dbm.Annotation(lecture_id=lecture_id, kind=kind, anchor=str(body.get("anchor", ""))[:120],
-                           anchor_label=str(body.get("anchor_label", ""))[:200], body=str(body.get("body", ""))[:5000])
+                           anchor_label=str(body.get("anchor_label", ""))[:200], body=str(body.get("body", ""))[:5000],
+                           quote=str(body.get("quote", ""))[:2000])
         s.add(a)
         lec = s.get(dbm.Lecture, lecture_id)
         if lec and kind == "practiced" and lec.study_state in ("unread", "read"):
@@ -545,6 +762,169 @@ def api_job_cancel(job_id: str):
 def api_job_retry(job_id: str):
     runner.retry(job_id)
     return {"ok": True}
+
+
+# ----------------------------------------------------------------- re-parse / regenerate-all / versions
+
+@app.post("/lectures/{lecture_id}/reparse")
+def lecture_reparse(lecture_id: str):
+    with dbm.session() as s:
+        _get_lecture(s, lecture_id)
+    runner.enqueue(lecture_id, "reparse_and_generate", {})
+    return RedirectResponse(f"/lectures/{lecture_id}", status_code=303)
+
+
+@app.post("/lectures/{lecture_id}/regenerate_all")
+def lecture_regenerate_all(lecture_id: str, overwrite_edits: str = Form("")):
+    """Regenerate every section with the current prompts while reusing the stored inventory and outline."""
+    with dbm.session() as s:
+        lec = _get_lecture(s, lecture_id)
+        if not lec.notes_json:
+            raise HTTPException(400, "No notes yet; use Generate.")
+        sections = ["overview", "summary", "practice", "glossary", "papers_resources"] + [f"concept:{c['id']}" for c in lec.notes_json["concepts"]]
+    runner.enqueue(lecture_id, "regenerate_sections", {"sections": sections, "overwrite_edits": bool(overwrite_edits)})
+    return RedirectResponse(f"/lectures/{lecture_id}", status_code=303)
+
+
+@app.get("/lectures/{lecture_id}/versions", response_class=HTMLResponse)
+def lecture_versions(request: Request, lecture_id: str):
+    with dbm.session() as s:
+        lec = _get_lecture(s, lecture_id)
+        cur = lec.notes_json or {}
+    return templates.TemplateResponse(request, "versions.html", _ctx(request, lec=lec, versions=pipeline.list_versions(lecture_id), current=cur))
+
+
+@app.get("/lectures/{lecture_id}/versions/{version}", response_class=HTMLResponse)
+def lecture_version_view(request: Request, lecture_id: str, version: int, view: str = "notes"):
+    with dbm.session() as s:
+        lec = _get_lecture(s, lecture_id)
+        files, assessment, transcript = lec.files, lec.source_assessment or {}, lec.transcript_json or {}
+    notes = pipeline.read_version(lecture_id, version)
+    if not notes:
+        raise HTTPException(404, "Version not found")
+    images = {im["id"]: im for im in notes.get("images", [])}
+    index = pipeline.read_history_index(lecture_id).get(str(version), {})
+    return templates.TemplateResponse(request, "lecture.html", _ctx(
+        request, lec=lec, notes=notes, transcript=transcript, annotations=[], last_job=None, view=view if view in ("notes", "interview", "practice", "coverage") else "notes",
+        images=images, files=files, assessment=assessment, version_view=version, version_meta=index))
+
+
+@app.post("/lectures/{lecture_id}/versions/{version}/restore")
+def lecture_version_restore(lecture_id: str, version: int):
+    if not pipeline.restore_version(lecture_id, version):
+        raise HTTPException(404)
+    return RedirectResponse(f"/lectures/{lecture_id}", status_code=303)
+
+
+@app.post("/lectures/{lecture_id}/versions/{version}/star")
+def lecture_version_star(lecture_id: str, version: int, label: str = Form("")):
+    index = pipeline.read_history_index(lecture_id)
+    entry = index.setdefault(str(version), {"version": version})
+    if label.strip():
+        entry["label"] = label.strip()[:120]
+        entry["starred"] = True
+    else:
+        entry["starred"] = not entry.get("starred", False)
+    pipeline.write_history_index(lecture_id, index)
+    return RedirectResponse(f"/lectures/{lecture_id}/versions", status_code=303)
+
+
+@app.post("/lectures/{lecture_id}/versions/snapshot")
+def lecture_version_snapshot(lecture_id: str, label: str = Form("")):
+    """Save the current notes as a starred version without changing anything."""
+    with dbm.session() as s:
+        lec = _get_lecture(s, lecture_id)
+        if not lec.notes_json:
+            raise HTTPException(400)
+        v = pipeline.archive_version(lecture_id, lec.notes_json, reason="manual snapshot")
+    index = pipeline.read_history_index(lecture_id)
+    index[str(v)]["starred"] = True
+    index[str(v)]["label"] = label.strip()[:120] or "snapshot"
+    pipeline.write_history_index(lecture_id, index)
+    return RedirectResponse(f"/lectures/{lecture_id}/versions", status_code=303)
+
+
+# ----------------------------------------------------------------- study guides
+
+@app.get("/guides", response_class=HTMLResponse)
+def guides_page(request: Request):
+    with dbm.session() as s:
+        guides = s.scalars(select(dbm.StudyGuide).order_by(dbm.StudyGuide.created_at.desc())).all()
+        lectures = s.scalars(select(dbm.Lecture).options(selectinload(dbm.Lecture.course)).order_by(dbm.Lecture.week, dbm.Lecture.order_index)).all()
+        return templates.TemplateResponse(request, "guides.html", _ctx(request, guides=guides, lectures=lectures))
+
+
+@app.post("/guides")
+async def guides_create(request: Request):
+    form = await request.form()
+    ids = [str(v) for k, v in form.multi_items() if k == "lecture_ids"]
+    title = str(form.get("title", "")).strip()
+    with dbm.session() as s:
+        lectures = [s.get(dbm.Lecture, i) for i in ids]
+        lectures = [l for l in lectures if l and l.notes_json]
+        if len(lectures) < 2:
+            raise HTTPException(400, "Pick at least two lectures that already have notes.")
+        if not title:
+            title = "Study guide: " + ", ".join(f"W{l.week or '?'}" for l in lectures)
+        g = dbm.StudyGuide(title=title, lecture_ids=[l.id for l in lectures], status="queued")
+        s.add(g)
+        s.commit()
+        gid, first = g.id, lectures[0].id
+    runner.enqueue(first, "build_guide", {"guide_id": gid})
+    return RedirectResponse(f"/guides/{gid}", status_code=303)
+
+
+@app.get("/guides/{guide_id}", response_class=HTMLResponse)
+def guide_page(request: Request, guide_id: str):
+    with dbm.session() as s:
+        g = s.get(dbm.StudyGuide, guide_id)
+        if not g:
+            raise HTTPException(404)
+        lectures = {l.id: l for l in [s.get(dbm.Lecture, i) for i in g.lecture_ids] if l}
+        job = s.scalars(select(dbm.Job).where(dbm.Job.kind == "build_guide").order_by(dbm.Job.created_at.desc())).all()
+        job = next((j for j in job if (j.params or {}).get("guide_id") == guide_id), None)
+        return templates.TemplateResponse(request, "guide.html", _ctx(request, g=g, guide=g.guide_json, lectures=lectures, job=job))
+
+
+@app.post("/guides/{guide_id}/rebuild")
+def guide_rebuild(guide_id: str):
+    with dbm.session() as s:
+        g = s.get(dbm.StudyGuide, guide_id)
+        if not g:
+            raise HTTPException(404)
+        g.status = "queued"
+        s.commit()
+        first = g.lecture_ids[0]
+    runner.enqueue(first, "build_guide", {"guide_id": guide_id})
+    return RedirectResponse(f"/guides/{guide_id}", status_code=303)
+
+
+@app.post("/guides/{guide_id}/delete")
+def guide_delete(guide_id: str):
+    with dbm.session() as s:
+        g = s.get(dbm.StudyGuide, guide_id)
+        if g:
+            s.delete(g)
+            s.commit()
+    return RedirectResponse("/guides", status_code=303)
+
+
+@app.get("/guides/{guide_id}/export/{fmt}")
+def guide_export(guide_id: str, fmt: str):
+    if fmt not in ("md", "html", "pdf", "docx"):
+        raise HTTPException(400)
+    with dbm.session() as s:
+        g = s.get(dbm.StudyGuide, guide_id)
+        if not g or not g.guide_json:
+            raise HTTPException(404)
+        guide = g.guide_json
+    out = export_guide(guide, fmt, DATA_DIR / "guides" / guide_id)
+    stem = re.sub(r"[^\w\- ]+", "", guide["title"]).strip().replace(" ", "_")[:60] or "study_guide"
+    if fmt == "md":
+        return Response(out, media_type="text/markdown", headers={"Content-Disposition": f'attachment; filename="{stem}.md"'})
+    if fmt == "html":
+        return Response(out, media_type="text/html", headers={"Content-Disposition": f'attachment; filename="{stem}.html"'})
+    return FileResponse(out, filename=Path(out).name)
 
 
 # ----------------------------------------------------------------- settings

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Versions · {{ lec.title }}{% endblock %}
+{% block content %}
+<div class="eyebrow"><a href="/lectures/{{ lec.id }}">← {{ lec.title }}</a></div>
+<h1>Saved versions of the notes</h1>
+<p class="muted">Every regeneration archives the notes it replaces, so nothing is lost. Open a version to read it, star it to keep it handy, or restore it to make it the current notes (the current notes are archived first).</p>
+<section class="card">
+  <h3>Current: v{{ current.version }} <span class="muted small">{{ current.generated_at[:16] }} · {{ current.model }} · {{ current.concepts|length }} concepts{% if current.restored_from %} · restored from v{{ current.restored_from }}{% endif %}</span></h3>
+  <form method="post" action="/lectures/{{ lec.id }}/versions/snapshot" class="row gap"><input type="text" name="label" placeholder="label, e.g. 'liked this style'"><button class="btn">★ Save current as a starred version</button></form>
+</section>
+<table class="table">
+<tr><th>Version</th><th>Generated</th><th>Model</th><th>Concepts</th><th>Why archived</th><th>Star / label</th><th></th></tr>
+{% for v in versions %}
+<tr>
+  <td>{% if v.starred %}★ {% endif %}<a href="/lectures/{{ lec.id }}/versions/{{ v.version }}">v{{ v.version }}</a>{% if v.label %}<div class="small">{{ v.label }}</div>{% endif %}</td>
+  <td class="small">{{ (v.generated_at or '')[:16] }}</td><td class="small">{{ v.model }}</td><td>{{ v.concepts }}</td><td class="small muted">{{ v.reason }}</td>
+  <td><form method="post" action="/lectures/{{ lec.id }}/versions/{{ v.version }}/star" class="row gap"><input type="text" name="label" value="{{ v.label }}" placeholder="label"><button class="btn tiny">{{ 'Unstar' if v.starred and not v.label else '★' }}</button></form></td>
+  <td><form method="post" action="/lectures/{{ lec.id }}/versions/{{ v.version }}/restore" onsubmit="return confirm('Make v{{ v.version }} the current notes? The current notes will be archived.')"><button class="btn tiny">Restore</button></form></td>
+</tr>
+{% endfor %}
+</table>
+{% if not versions %}<p class="muted">No archived versions yet. They appear here after the first regeneration or snapshot.</p>{% endif %}
+{% endblock %}

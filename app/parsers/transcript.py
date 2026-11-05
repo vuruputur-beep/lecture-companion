@@ -44,6 +44,7 @@ class Segment:
     start: float | None
     end: float | None
     text: str
+    after: float | None = None  # continuation of a long paragraph that began at this time (no exact time known)
 
 
 @dataclass
@@ -110,6 +111,34 @@ def format_timestamp(seconds: float | None) -> str:
     return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
 
 
+MAX_PARA_WORDS = 170
+
+
+def _split_long(seg: Segment) -> list[Segment]:
+    """Otter sometimes emits one paragraph for 10+ minutes of speech. Split it at sentence
+    boundaries into citable pieces. Only the first piece keeps the real timestamp; the
+    rest carry `after` = that timestamp, so no timing is invented."""
+    words = seg.text.split()
+    if len(words) <= MAX_PARA_WORDS * 1.4:
+        return [seg]
+    sentences = re.split(r"(?<=[.!?])\s+", seg.text)
+    pieces: list[Segment] = []
+    chunk: list[str] = []
+    count = 0
+    for sent in sentences:
+        chunk.append(sent)
+        count += len(sent.split())
+        if count >= MAX_PARA_WORDS:
+            pieces.append(Segment(0, "", seg.speaker, None, None, " ".join(chunk), after=seg.start))
+            chunk, count = [], 0
+    if chunk:
+        pieces.append(Segment(0, "", seg.speaker, None, None, " ".join(chunk), after=seg.start))
+    if pieces:
+        pieces[0].start, pieces[0].after = seg.start, None
+        pieces[-1].end = seg.end
+    return pieces or [seg]
+
+
 def _finalize(segments: list[Segment]) -> list[Segment]:
     """Assign ids, fill `end` from the next segment's start, drop empties."""
     out: list[Segment] = []
@@ -117,13 +146,14 @@ def _finalize(segments: list[Segment]) -> list[Segment]:
         s.text = re.sub(r"[ \t]+", " ", s.text).strip()
         if not s.text:
             continue
-        out.append(s)
+        out.extend(_split_long(s) if s.start is not None else [s])
     for i, s in enumerate(out):
         s.idx = i
         s.pid = f"P{i + 1}"
-        if s.end is None and s.start is not None:
+        if s.end is None and s.start is not None and s.after is None:
             nxt = next((o.start for o in out[i + 1:] if o.start is not None), None)
-            s.end = nxt
+            if nxt is not None and not any(o.after is not None and o.start is None for o in out[i + 1:out.index(next(o for o in out[i + 1:] if o.start is not None))]):
+                s.end = nxt
     return out
 
 
@@ -450,9 +480,11 @@ def transcript_to_text(tj: dict[str, Any], with_ids: bool = True) -> str:
     """Render canonical transcript as the text the model sees (with citation ids)."""
     out: list[str] = []
     for s in tj.get("segments", []):
-        tag = s["pid"]
+        tag = (f"pt{s['part']} " if s.get("part") else "") + s["pid"]
         if s.get("start") is not None:
             tag += f" @{format_timestamp(s['start'])}"
+        elif s.get("after") is not None:
+            tag += f" after {format_timestamp(s['after'])}"
         spk = f" {s['speaker']}:" if s.get("speaker") else ""
         out.append(f"[{tag}]{spk} {s['text']}" if with_ids else s["text"])
     return "\n".join(out)

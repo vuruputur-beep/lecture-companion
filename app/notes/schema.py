@@ -82,7 +82,8 @@ class Concept(BaseModel):
     title: str
     time_range: str = Field(default="", description="e.g. '0:12:04 - 0:41:30' or 'P4 - P19'")
     refs: list[str] = Field(default_factory=list, description="Primary transcript refs spanning this concept")
-    plain_explanation: str = Field(description="Plain-English explanation assuming no prior knowledge")
+    in_one_breath: str = Field(default="", description="One or two sentences a non-technical friend would understand; zero jargon")
+    plain_explanation: str = Field(description="Plain-English explanation assuming no prior knowledge; every technical term glossed in parentheses on first use")
     teaching_bullets: list[Cited] = Field(default_factory=list, description="At least 10 meaningful bullets for substantive concepts")
     definitions: list[Definition] = Field(default_factory=list)
     why_it_matters: str = ""
@@ -104,11 +105,29 @@ class Concept(BaseModel):
     user_edited_fields: list[str] = Field(default_factory=list)
 
 
+class Foundation(BaseModel):
+    """A background idea the lecture takes for granted, explained for a complete beginner."""
+    term: str
+    plain_explanation: str = Field(description="2-4 sentences in everyday words, no unexplained jargon")
+    why_needed_here: str = Field(default="", description="Where in this lecture it is assumed")
+    everyday_analogy: str = ""
+
+
+class BigPicture(BaseModel):
+    """How everything in the lecture fits together."""
+    one_paragraph_story: str = Field(default="", description="The whole lecture as a short story for a beginner")
+    flow: list[str] = Field(default_factory=list, description="The end-to-end flow as ordered steps, each naming the concept it belongs to")
+    mental_model: str = Field(default="", description="One memorable picture or metaphor for the whole thing, with its limits")
+    where_this_fits: str = Field(default="", description="How this lecture relates to the course / an FDE's job")
+
+
 class Overview(BaseModel):
     learning_objectives: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
     introduction: str = ""
     takeaways: list[Cited] = Field(default_factory=list, description="At least 10 meaningful takeaways")
+    foundations: list[Foundation] = Field(default_factory=list, description="Background a beginner needs before this lecture makes sense")
+    big_picture: BigPicture = Field(default_factory=BigPicture)
     user_edited_fields: list[str] = Field(default_factory=list)
 
 
@@ -308,3 +327,49 @@ def strict_schema(model: type[BaseModel]) -> dict[str, Any]:
 
     fix(schema)
     return schema
+
+
+# ---------- cross-lecture study guide ----------
+
+class GuideConceptRef(BaseModel):
+    lecture_id: str
+    concept_id: str
+    title: str
+
+
+class GuideTheme(BaseModel):
+    theme: str
+    summary: str = Field(description="How the concepts under this theme fit together across lectures, for a beginner")
+    concepts: list[GuideConceptRef] = Field(default_factory=list)
+
+
+class GuidePathStep(BaseModel):
+    step: int
+    title: str
+    what_to_do: str
+    lecture_id: str = ""
+    concept_ids: list[str] = Field(default_factory=list)
+    minutes: int = 20
+
+
+class GuideQuestionRef(BaseModel):
+    lecture_id: str
+    concept_id: str
+    index: int = Field(description="Index of the interview question within that concept")
+
+
+class GuideQuestionGroup(BaseModel):
+    theme: str
+    questions: list[GuideQuestionRef] = Field(default_factory=list)
+
+
+class StudyGuide(BaseModel):
+    title: str
+    story: str = Field(description="How these lectures build on each other, told plainly for a beginner")
+    themes: list[GuideTheme] = Field(default_factory=list)
+    foundations: list[Foundation] = Field(default_factory=list, description="Merged, deduplicated background across lectures")
+    learning_path: list[GuidePathStep] = Field(default_factory=list, description="Ordered study sessions of ~20 minutes")
+    interview_bank: list[GuideQuestionGroup] = Field(default_factory=list, description="Existing interview questions grouped by theme (references only)")
+    overlaps: list[str] = Field(default_factory=list, description="Ideas repeated across lectures and how the treatments differ")
+    gaps: list[str] = Field(default_factory=list, description="Things assumed but never taught across the set")
+    glossary: list[GlossaryEntry] = Field(default_factory=list, description="Merged glossary; refs hold lecture ids")

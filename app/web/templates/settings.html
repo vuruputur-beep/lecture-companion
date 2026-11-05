@@ -24,8 +24,8 @@
       <select name="provider">{% for p in ['anthropic','openai','openai_compatible','mock'] %}<option value="{{ p }}" {% if cfg.provider == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select>
       <div class="hint">mock = offline fixture output for testing the workflow without a key.</div></div>
     <div class="field"><label>Model</label><input name="model" value="{{ cfg.model }}" list="models">
-      <datalist id="models"><option value="claude-opus-5-5"><option value="claude-sonnet-5-5"><option value="claude-haiku-4-5"><option value="gpt-5"><option value="gpt-5-mini"><option value="gpt-4.1"></datalist></div>
-    <div class="field"><label>Effort (Anthropic)</label><select name="effort">{% for e in ['low','medium','high','xhigh','max'] %}<option {% if cfg.effort == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+      <datalist id="models"><option value="claude-opus-5-5"><option value="claude-sonnet-5-5"><option value="claude-haiku-4-5"><option value="gpt-5"><option value="gpt-5.2"><option value="gpt-5-mini"><option value="gpt-4.1"></datalist></div>
+    <div class="field"><label>Reasoning effort</label><select name="effort">{% for e in ['minimal','low','medium','high','xhigh','max'] %}<option {% if cfg.effort == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select><div class="hint">OpenAI gpt-5: minimal/low/medium/high (output tokens, and so cost, scale with this). Anthropic: low–max.</div></div>
   </div>
   <div class="field"><label>OpenAI-compatible base URL (for local servers)</label><input name="openai_base_url" value="{{ cfg.openai_base_url }}" placeholder="http://localhost:11434/v1"></div>
   <div class="cols">

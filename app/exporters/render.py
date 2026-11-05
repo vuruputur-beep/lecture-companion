@@ -80,12 +80,32 @@ def render_markdown(lecture: dict[str, Any], notes: dict[str, Any], mode: str = 
     L += ["## A. Lecture overview", "", "### Learning objectives", *[f"- {x}" for x in ov["learning_objectives"]], "",
           "### Prerequisites", *[f"- {x}" for x in ov["prerequisites"]], "", "### Introduction", ov["introduction"], "",
           "### Key takeaways", *_cited_list(ov["takeaways"]), ""]
+    if ov.get("foundations"):
+        L += ["### Before you start: the basics this lecture assumes *[Additional explanation]*", "",
+              "*Not taught in the lecture, but assumed by the instructor.*", ""]
+        for f in ov["foundations"]:
+            L += [f"- **{f['term']}** - {f['plain_explanation']}" + (f" *Think of it like:* {f['everyday_analogy']}" if f.get("everyday_analogy") else "")
+                  + (f" *(comes up: {f['why_needed_here']})*" if f.get("why_needed_here") else "")]
+        L += [""]
+    bp = ov.get("big_picture") or {}
+    if bp.get("one_paragraph_story") or bp.get("flow"):
+        L += ["### The big picture: how it all fits together", ""]
+        if bp.get("one_paragraph_story"):
+            L += [bp["one_paragraph_story"], ""]
+        if bp.get("flow"):
+            L += ["**The flow, start to finish**", *[f"{i}. {st}" for i, st in enumerate(bp["flow"], start=1)], ""]
+        if bp.get("mental_model"):
+            L += ["**One picture to remember.** " + bp["mental_model"], ""]
+        if bp.get("where_this_fits"):
+            L += ["**Where this fits.** " + bp["where_this_fits"], ""]
 
     L += ["## B. Detailed concepts", ""]
     for c in notes["concepts"]:
         L += [f"### Concept {c['number']}: {c['title']}", ""]
         if c.get("time_range"):
             L += [f"*{c['time_range']}*", ""]
+        if c.get("in_one_breath"):
+            L += ["> " + c["in_one_breath"], ""]
         L += ["**Plain-English explanation.** " + c["plain_explanation"], ""]
         bullets = c["teaching_bullets"][:5] if concise else c["teaching_bullets"]
         L += ["**Teaching points**", *_cited_list(bullets), ""]
@@ -227,7 +247,8 @@ def render_markdown(lecture: dict[str, Any], notes: dict[str, Any], mode: str = 
     if not concise and transcript:
         L += ["## H. Source material: transcript", ""]
         for s in transcript.get("segments", []):
-            tag = s["pid"] + (f" @{format_timestamp(s['start'])}" if s.get("start") is not None else "")
+            tag = s["pid"] + (f" @{format_timestamp(s['start'])}" if s.get("start") is not None
+                              else (f" after {format_timestamp(s['after'])}" if s.get("after") is not None else ""))
             spk = f"**{s['speaker']}:** " if s.get("speaker") else ""
             L += [f"<a id=\"{s['pid']}\"></a>`{tag}` {spk}{s['text']}", ""]
         if notes.get("images"):
@@ -302,11 +323,17 @@ def export_pdf(lecture: dict[str, Any], notes: dict[str, Any], mode: str, transc
 # ------------------------------------------------------------------ docx
 
 def export_docx(lecture: dict[str, Any], notes: dict[str, Any], mode: str, transcript: dict[str, Any] | None, out_path: Path) -> Path:
+    md = render_markdown(lecture, notes, mode, transcript, image_base="images")
+    images = {Path(i["path"]).name: lecture_dir(lecture["id"]) / i["path"] for i in notes.get("images", [])}
+    captions = {Path(i["path"]).name: f"{i['id']} - {i.get('caption', '')}" for i in notes.get("images", [])}
+    return markdown_to_docx(md, images, captions, out_path)
+
+
+def markdown_to_docx(md: str, images: dict[str, Path], captions: dict[str, str], out_path: Path) -> Path:
+    """Render the Markdown produced by this module into DOCX (headings, lists, code, images)."""
     import docx
-    from docx.enum.text import WD_BREAK
     from docx.shared import Inches, Pt, RGBColor
 
-    ldir = lecture_dir(lecture["id"])
     d = docx.Document()
     st = d.styles["Normal"]
     st.font.name = "Calibri"
@@ -353,17 +380,16 @@ def export_docx(lecture: dict[str, Any], notes: dict[str, Any], mode: str, trans
             r.font.size = Pt(8.5)
         d.add_paragraph()
 
-    def image(im: dict[str, Any]):
-        p = ldir / im["path"]
-        if p.exists():
+    def image(name: str):
+        p = images.get(name)
+        if p and p.exists():
             try:
                 d.add_picture(str(p), width=Inches(5.5))
-                para(f"{im['id']} - {im.get('caption', '')}", italic=True, size=9)
+                para(captions.get(name, name), italic=True, size=9)
             except Exception:
-                para(f"[image {im['id']} could not be embedded]", italic=True)
+                para(f"[image {name} could not be embedded]", italic=True)
 
     GREY = RGBColor(0x6E, 0x6E, 0x73)
-    md = render_markdown(lecture, notes, mode, transcript, image_base="images")
     # Walk the markdown line by line so DOCX mirrors the other exports exactly.
     in_code, code_buf, code_lang = False, [], ""
     ol_counter = 0
@@ -389,10 +415,7 @@ def export_docx(lecture: dict[str, Any], notes: dict[str, Any], mode: str, trans
         elif line.startswith("![") :
             m = re.match(r"!\[.*\]\(([^)]+)\)$", line)
             if m:
-                name = Path(m.group(1)).name
-                im = next((i for i in notes.get("images", []) if Path(i["path"]).name == name), None)
-                if im:
-                    image(im)
+                image(Path(m.group(1)).name)
         elif line.startswith("> "):
             p = para(); rich(p, line[2:]); p.paragraph_format.left_indent = Inches(0.3)
             for r in p.runs:
@@ -433,3 +456,72 @@ def export_all(lecture: dict[str, Any], notes: dict[str, Any], transcript: dict[
     except RuntimeError as e:
         paths["pdf_error"] = e  # type: ignore[assignment]
     return paths
+
+
+# ------------------------------------------------------------------ study guide exports
+
+def render_guide_markdown(guide: dict[str, Any]) -> str:
+    L: list[str] = [f"# {guide['title']}", "",
+                    "*Study guide combining: " + "; ".join(f"Week {l.get('week') or '?'} {l['title']}" for l in guide.get("lectures", [])) + "*", "",
+                    f"Generated {guide.get('generated_at', '')[:10]} with {guide.get('model', '')}", "",
+                    "## How these lectures build on each other", "", guide.get("story", ""), ""]
+    if guide.get("foundations"):
+        L += ["## Before you start: the basics these lectures assume", ""]
+        for f in guide["foundations"]:
+            L += [f"- **{f['term']}** - {f['plain_explanation']}" + (f" *Think of it like:* {f['everyday_analogy']}" if f.get("everyday_analogy") else "")]
+        L += [""]
+    L += ["## Themes across the lectures", ""]
+    for t in guide.get("themes", []):
+        L += [f"### {t['theme']}", "", t["summary"], ""]
+        for c in t.get("concepts", []):
+            L += [f"- {c['title']} *({c.get('lecture_title', c['lecture_id'])}, {c['concept_id']})*"]
+        L += [""]
+    L += ["## Learning path (short sessions)", ""]
+    for st in guide.get("learning_path", []):
+        L += [f"{st['step']}. **{st['title']}** (~{st.get('minutes', 20)} min) - {st['what_to_do']}" + (f" *[{st.get('lecture_title', '')}: {', '.join(st.get('concept_ids', []))}]*" if st.get("lecture_id") else "")]
+    L += [""]
+    if guide.get("overlaps") or guide.get("gaps"):
+        L += ["## Overlaps and gaps", ""]
+        L += [f"- Overlap: {o}" for o in guide.get("overlaps", [])] + [f"- Gap: {g}" for g in guide.get("gaps", [])] + [""]
+    L += ["## Interview question bank", ""]
+    for grp in guide.get("interview_bank", []):
+        L += [f"### {grp['theme']}", ""]
+        for q in grp.get("questions", []):
+            L += [f"- **Q: {q['question']}** *({q.get('lecture_title', '')}, {q.get('source', 'generated')})*",
+                  f"  - **Answer (30-60 s):** {q['short_answer']}", f"  - **Deeper:** {q['deep_answer']}"]
+        L += [""]
+    L += ["## Merged glossary", ""]
+    for g in guide.get("glossary", []):
+        L += [f"- **{g['term']}** - {g['explanation']}" + (f" *({', '.join(g.get('refs', []))})*" if g.get("refs") else "")]
+    L += [""]
+    return "\n".join(L)
+
+
+def render_guide_html(guide: dict[str, Any]) -> str:
+    body = MarkdownIt("commonmark", {"html": True}).enable("table").render(render_guide_markdown(guide))
+    return f"<!doctype html><html><head><meta charset='utf-8'><title>{html.escape(guide['title'])}</title><style>{HTML_CSS}</style></head><body>{body}</body></html>"
+
+
+def export_guide(guide: dict[str, Any], fmt: str, out_dir: Path) -> Path | str:
+    stem = re.sub(r"[^\w\- ]+", "", guide["title"]).strip().replace(" ", "_")[:60] or "study_guide"
+    if fmt == "md":
+        return render_guide_markdown(guide)
+    if fmt == "html":
+        return render_guide_html(guide)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if fmt == "docx":
+        return markdown_to_docx(render_guide_markdown(guide), {}, {}, out_dir / f"{stem}.docx")
+    if fmt == "pdf":
+        chrome = find_chrome()
+        if not chrome:
+            raise RuntimeError("No Chrome/Chromium found for PDF export.")
+        out_path = out_dir / f"{stem}.pdf"
+        with tempfile.TemporaryDirectory() as td:
+            src = Path(td) / "guide.html"
+            src.write_text(render_guide_html(guide), encoding="utf-8")
+            subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={out_path}",
+                            f"--user-data-dir={td}/profile", "--no-first-run", src.as_uri()], capture_output=True, text=True, timeout=180)
+        if not out_path.exists():
+            raise RuntimeError("Chrome PDF export failed")
+        return out_path
+    raise ValueError(fmt)

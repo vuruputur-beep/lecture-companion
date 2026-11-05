@@ -13,7 +13,7 @@ Requirements: macOS/Linux, [uv](https://docs.astral.sh/uv/), Google Chrome (for 
 ./run.sh                 # creates .venv on first run, then serves http://127.0.0.1:8765
 ```
 
-Then open http://127.0.0.1:8765 → **Settings** → paste your Anthropic (or OpenAI) API key. The key is written to `data/secrets.env` (mode 0600), never to source control or the browser. Click **Test connection**.
+Then open http://127.0.0.1:8765 → **Settings** → paste your OpenAI (or Anthropic) API key if it is not already in your environment. The key is written to `data/secrets.env` (mode 0600), never to source control or the browser. Click **Test connection**.
 
 Environment variables override settings: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `LC_PROVIDER`, `LC_MODEL`, `LC_MAX_CONCURRENT_JOBS`, `LC_DATA_DIR`, etc. (see `app/config.py`).
 
@@ -31,12 +31,16 @@ LC_PROVIDER=mock .venv/bin/python scripts/load_fixtures.py && LC_PROVIDER=mock .
 4. **Study** (`/lectures/<id>`): overview, expandable concepts, interview tab, practice tab (hidden answers), source tab (full searchable transcript, screenshots), coverage tab. Focus mode (`f`), study timer, saved reading position, bookmarks/notes/review markers (click any concept or bullet), read/practiced/reviewed states.
 5. **Edit** (`Edit & regenerate` tab): form-based editing per section; edited fields are tracked and preserved when sections are regenerated. Regenerate selected sections cheaply (intermediate results are reused).
 6. **Export**: PDF, DOCX, Markdown, HTML, each in *detailed* or *concise* mode, all rendered from the same notes model with images embedded.
+7. **Versions** (`Versions` tab): every regeneration archives the notes it replaces. Open any version read-only, star it with a label, snapshot the current notes, or restore an old version (the current one is archived first).
+8. **Study guides** (`/guides`): pick two or more lectures and build one combined guide: how the lectures build on each other, cross-lecture themes linking back to each concept, merged background and glossary, a learning path in ~20-minute sessions, overlaps and gaps, and an interview question bank drawn verbatim from the lectures' questions. Exports to PDF/DOCX/Markdown/HTML.
+9. **Multi-part sessions**: tick *Combine these files into one lecture* on the import page to merge several transcript files (e.g. a session recorded in two parts) into one lecture; each part keeps its own timestamps and citations show the part (`pt2 P12 @0:05`).
+10. **Everything runs from the web UI**: the Edit tab has *Regenerate selected*, *Regenerate all sections* (reuses the stored outline; use after a style change), *Re-parse transcript and regenerate* (after parser changes), and *Full regeneration*.
 
 ## Notes structure
 
-Every lecture gets: A. overview (objectives, prerequisites, intro, 10+ takeaways) · B. concepts in lecture order, each with plain-English explanation, 10+ teaching bullets, definitions, why/when, analogy + limits, steps, examples/code, assumptions/tradeoffs/limitations/mistakes, connections, deeper explanation, FDE applications, demos/troubleshooting/corrections/Q&A, interview questions (30–60 s answer, deeper answer, follow-ups, conditions; marked generated vs instructor) · C. glossary · D. papers mentioned (with arXiv/Crossref verification; uncertain matches flagged; additional reading kept separate) · E. websites/resources (URL verification) · F. summary + "next topic announced" vs "suggested next steps" · G. practice (recall with hidden answers, exercises, progression) · H. source material · coverage report.
+Every lecture gets: A. overview (objectives, prerequisites, intro, 10+ takeaways, a *Before you start* section explaining the background the lecture assumes, and a *big picture* story, step-by-step flow, and mental model tying the concepts together) · B. concepts in lecture order, each with a zero-jargon one-breath summary, plain-English explanation (every term glossed on first use), 10+ teaching bullets, definitions, why/when, analogy + limits, steps, examples/code, assumptions/tradeoffs/limitations/mistakes, connections, deeper explanation, FDE applications, demos/troubleshooting/corrections/Q&A, interview questions (30–60 s answer, deeper answer, follow-ups, conditions; marked generated vs instructor) · C. glossary · D. papers mentioned (with arXiv/Crossref verification; uncertain matches flagged; additional reading kept separate) · E. websites/resources (URL verification) · F. summary + "next topic announced" vs "suggested next steps" · G. practice (recall with hidden answers, exercises, progression) · H. source material · coverage report.
 
-Every claim carries provenance: **Taught** (with transcript refs such as `P12@1:02:03`, or `P12` when the export has no timestamps), **Additional explanation**, or **Needs verification**. Nothing is invented: no timestamps, titles, authors, or URLs beyond what the source or a verified lookup supports.
+Every claim carries provenance: **Taught** (with transcript refs such as `P12@1:02:03`, or `P12` when the export has no timestamps), **Additional explanation**, or **Needs verification**. Nothing is invented: no timestamps, titles, authors, or URLs beyond what the source or a verified lookup supports. Transcription garbles are corrected in the prose and recorded as "heard as …" flags. In the web UI every glossary term shows its definition on hover. Very long Otter paragraphs are split into ~170-word pieces; only the first piece keeps the real timestamp and the rest are labelled "after h:mm:ss".
 
 ## Verified in this release
 
@@ -60,9 +64,17 @@ See the **Jobs** page for per-call tokens, cost, and seconds on your own lecture
 | Cost at list price | $0.77 |
 | Coverage | 26/26 paragraphs referenced, 0 gaps |
 
+Cheaper settings measured on the same fixture (2026-11-04):
+
+| Setting | Wall time | Tokens in / out | Cost | Quality markers |
+|---|---|---|---|---|
+| gpt-5, effort medium | 603 s | 23.8k / 73.5k | $0.77 | 7 concepts, 26/26 coverage, 15 takeaways, 39 glossary terms |
+| **gpt-5, effort low (default)** | 316 s | 24.6k / 46.0k | $0.49 | 7 concepts, 26/26 coverage, 12 takeaways, 28 glossary terms, all demos/corrections captured |
+| gpt-4o-mini | 189 s | 15.3k / 13.1k | $0.01 | 6 concepts, 26/26 coverage, but weaker outline (splits "common mistakes" off, makes "next week" a concept), 10 glossary terms, one runaway output needed the brevity retry |
+
 Concept entries now run 3 at a time (Settings → `concept_parallelism`), which should cut wall time roughly in half. A full 4-hour lecture has not been benchmarked yet; extrapolating by chunk and concept count suggests tens of minutes and a few dollars per lecture, but treat that as an estimate until a real transcript has been run. Real lecture timings depend on the provider and model and are recorded per job, so no fixed speed is promised.
 
-Default model: Anthropic `claude-opus-5-5` (list price $4 / $20 per million tokens). A 4-hour lecture (~35k words) is roughly 50k input tokens per pass; with the inventory pass plus one call per concept the expected total is on the order of 300–500k input and 100–150k output tokens, i.e. a few dollars per lecture. Spending limits per lecture and in total are enforced in Settings; a job that hits the limit stops at a checkpoint and resumes when the limit is raised.
+Default provider/model: OpenAI `gpt-5` (switchable in Settings; Anthropic `claude-opus-5-5` is also supported). A 4-hour lecture (~35k words) is roughly 50k input tokens per pass; with the inventory pass plus one call per concept the expected total is on the order of 300–500k input and 100–150k output tokens, i.e. a few dollars per lecture. Spending limits per lecture and in total are enforced in Settings; a job that hits the limit stops at a checkpoint and resumes when the limit is raised.
 
 ## Layout
 

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Study guides · Lecture Companion{% endblock %}
+{% block content %}
+<h1>Study guides</h1>
+<p class="muted">Combine two or more lectures into one guide: cross-lecture themes, merged background and glossary, a short-session learning path, and an interview question bank. Guides are built from the lectures' existing notes, so they are cheap and never contradict the notes.</p>
+<form method="post" action="/guides" class="card form">
+  <div class="field"><label>Title (optional)</label><input name="title" placeholder="e.g. Weeks 1-4 review"></div>
+  <div class="checks">
+  {% for l in lectures %}<label class="check"><input type="checkbox" name="lecture_ids" value="{{ l.id }}" {% if not l.notes_json %}disabled{% endif %}> W{{ l.week or '?' }} · {{ l.title }}{% if not l.notes_json %} <span class="muted small">(no notes yet)</span>{% endif %}</label>{% endfor %}
+  </div>
+  <button class="btn primary">Build study guide</button>
+</form>
+{% for g in guides %}
+<div class="card row between">
+  <div><a href="/guides/{{ g.id }}"><strong>{{ g.title }}</strong></a> <span class="pill status {{ g.status }}">{{ g.status }}</span>
+    <div class="small muted">{{ g.lecture_ids|length }} lectures · {{ g.created_at.strftime('%Y-%m-%d %H:%M') }} · ${{ '%.2f'|format(g.cost_usd or 0) }}</div></div>
+  <form method="post" action="/guides/{{ g.id }}/delete" onsubmit="return confirm('Delete this guide?')"><button class="btn tiny danger">Delete</button></form>
+</div>
+{% endfor %}
+{% endblock %}

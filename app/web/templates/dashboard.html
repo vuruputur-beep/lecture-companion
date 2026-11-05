@@ -17,7 +17,47 @@
 </section>
 {% endif %}
 
-{% if not courses %}
+{% macro lecture_card(lec) %}
+<div class="card lecture-card status-{{ lec.status }}">
+  <a class="cardlink" href="/lectures/{{ lec.id }}">
+    <div class="row between">
+      <span class="pill state-{{ lec.study_state }}">{{ lec.study_state }}</span>
+      <span class="pill status {{ lec.status }}">{{ lec.status }}</span>
+    </div>
+    <h4>{{ lec.title }}</h4>
+    <div class="muted small">{{ lec.course.name if lec.course else '' }} · W{{ lec.week or '?' }} · {{ lec.lecture_date or 'date unknown' }}
+      {% if lec.transcript_json %} · {{ lec.transcript_json.word_count }} words{% endif %}</div>
+    {% if lec.notes_json %}<div class="muted small">{{ lec.notes_json.concepts|length }} concepts · v{{ lec.notes_version }} · ${{ '%.2f'|format(lec.cost_usd or 0) }}</div>{% endif %}
+    {% if lec.reading_progress %}<div class="progress"><span style="width:{{ (lec.reading_progress*100)|round|int }}%"></span></div>{% endif %}
+  </a>
+  <form method="post" action="/lectures/{{ lec.id }}/move" class="movef"><label class="small muted">📁</label><select name="folder_id" onchange="this.form.submit()" title="Move to folder"><option value="">— no folder —</option>{% for fid, fname in folder_choices %}<option value="{{ fid }}" {% if lec.folder_id == fid %}selected{% endif %}>{{ fname }}</option>{% endfor %}</select></form>
+</div>
+{% endmacro %}
+
+{% macro folder_node(node) %}
+<details class="folder" open>
+  <summary><span class="fname">📁 {{ node.folder.name }}</span> <span class="muted small">{{ node.lectures|length }} lecture{{ '' if node.lectures|length == 1 else 's' }}{% if node.children %} · {{ node.children|length }} sub-folder{{ '' if node.children|length == 1 else 's' }}{% endif %}</span>
+    <span class="folder-actions">
+      <form method="post" action="/folders/{{ node.folder.id }}/rename" class="inline"><input type="text" name="name" value="{{ node.folder.name }}" size="14"><button class="btn tiny">Rename</button></form>
+      <form method="post" action="/folders" class="inline"><input type="hidden" name="parent_id" value="{{ node.folder.id }}"><input type="text" name="name" placeholder="new sub-folder" size="12"><button class="btn tiny">+ Sub-folder</button></form>
+      <form method="post" action="/folders/{{ node.folder.id }}/delete" class="inline" onsubmit="return confirm('Delete folder? Lectures inside move up one level; nothing is deleted.')"><button class="btn tiny danger">Delete</button></form>
+    </span></summary>
+  <div class="folder-body">
+    {% if node.lectures %}<div class="grid">{% for lec in node.lectures %}{{ lecture_card(lec) }}{% endfor %}</div>{% endif %}
+    {% for child in node.children %}{{ folder_node(child) }}{% endfor %}
+    {% if not node.lectures and not node.children %}<p class="muted small">Empty. Use a lecture card's folder menu to move lectures here.</p>{% endif %}
+  </div>
+</details>
+{% endmacro %}
+
+<section class="folders">
+  <div class="row between"><h2>Folders</h2>
+    <form method="post" action="/folders" class="row gap"><input type="text" name="name" placeholder="New folder name" required><button class="btn">+ Folder</button></form></div>
+  {% if not tree %}<p class="muted small">No folders yet. Create one, then use the folder menu on any lecture card to move it in. Folders can be nested.</p>{% endif %}
+  {% for node in tree %}{{ folder_node(node) }}{% endfor %}
+</section>
+
+{% if not courses and not tree %}
 <section class="card empty">
   <h2>No lectures yet</h2>
   <p>Import your Otter.ai transcript exports (TXT, SRT, DOCX, or text PDF), or paste a transcript, to generate study notes.</p>
@@ -26,25 +66,16 @@
 </section>
 {% endif %}
 
+{% if courses %}<h2 class="muted-h">Not in a folder</h2>{% endif %}
 {% for item in courses %}
 <section class="course">
-  <h2>{{ item.course.name }}</h2>
+  <h3>{{ item.course.name }}</h3>
   {% for week, lectures in item.weeks %}
   <div class="week">
-    <h3>{% if week is none %}Week not set{% else %}Week {{ week }}{% endif %}</h3>
+    <h4 class="muted">{% if week is none %}Week not set{% else %}Week {{ week }}{% endif %}</h4>
     <div class="grid">
       {% for lec in lectures %}
-      <a class="card lecture-card status-{{ lec.status }}" href="/lectures/{{ lec.id }}">
-        <div class="row between">
-          <span class="pill state-{{ lec.study_state }}">{{ lec.study_state }}</span>
-          <span class="pill status {{ lec.status }}">{{ lec.status }}</span>
-        </div>
-        <h4>{{ lec.title }}</h4>
-        <div class="muted small">{{ lec.lecture_date or 'date unknown' }} · {{ lec.source_kind.replace('_',' ') }}
-          {% if lec.transcript_json %} · {{ lec.transcript_json.word_count }} words{% if lec.transcript_json.duration_seconds %} · {{ lec.transcript_json.duration_seconds|ts }}{% endif %}{% endif %}</div>
-        {% if lec.notes_json %}<div class="muted small">{{ lec.notes_json.concepts|length }} concepts · v{{ lec.notes_version }} · ${{ '%.2f'|format(lec.cost_usd or 0) }}</div>{% endif %}
-        {% if lec.reading_progress %}<div class="progress"><span style="width:{{ (lec.reading_progress*100)|round|int }}%"></span></div>{% endif %}
-      </a>
+      {{ lecture_card(lec) }}
       {% endfor %}
     </div>
   </div>
@@ -52,18 +83,5 @@
 </section>
 {% endfor %}
 
-{% if recent_jobs %}
-<section>
-  <h3>Recent jobs</h3>
-  <table class="table">
-    <tr><th>Lecture</th><th>Kind</th><th>Status</th><th>Progress</th><th>Cost</th><th>Message</th></tr>
-    {% for j in recent_jobs %}
-    <tr><td><a href="/lectures/{{ j.lecture_id }}">{{ j.lecture.title if j.lecture else j.lecture_id }}</a></td><td>{{ j.kind }}</td>
-      <td><span class="pill status {{ j.status }}">{{ j.status }}</span></td><td>{{ (j.progress*100)|round|int }}%</td>
-      <td>${{ '%.2f'|format(j.cost_usd or 0) }}</td><td class="small">{{ j.message[:90] }}</td></tr>
-    {% endfor %}
-  </table>
-  <div class="muted small">Total: {{ totals.lectures }} lectures · measured spend ${{ '%.2f'|format(totals.cost) }}</div>
-</section>
-{% endif %}
+
 {% endblock %}

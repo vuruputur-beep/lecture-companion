@@ -74,6 +74,14 @@ class MockProvider(Provider):
                                  "scope": "Fixture scope.", "start_ref": a, "end_ref": b, "extra_refs": [],
                                  "grouped_mentions": [], "is_substantive": True})
             data = {"concepts": concepts, "rationale": "fixture"}
+        elif title == "Explanation" or step.startswith("explain"):
+            data = {"explanation": "[FIXTURE] Plain-words explanation of the selected passage."}
+        elif title == "ConceptPart":
+            props = schema.get("properties", {})
+            full = self.generate_json(system, user.replace("TASK: Regenerate ONLY", "TASK: Write") if isinstance(user, str) else user, {"title": "Concept"}, max_tokens, step="concept:x").data
+            data = {k: full.get(k) for k in props}
+            if "interview_questions" in data:
+                data["interview_questions"][0]["question"] = "[FIXTURE] regenerated question"
         elif title == "Concept" or step.startswith("concept"):
             m = re.search(r'id must be "(c\d+)", number (\d+)', full_text)
             cid, num = (m.group(1), int(m.group(2))) if m else ("c1", 1)
@@ -83,7 +91,7 @@ class MockProvider(Provider):
             data = {
                 "id": cid, "number": num, "title": f"[FIXTURE] Concept {num}", "time_range": f"{refs[0]} - {refs[-1]}",
                 "refs": [refs[0], refs[-1]],
-                "plain_explanation": "[FIXTURE] " + " ".join(sents[:3]),
+                "in_one_breath": "[FIXTURE] one breath.", "plain_explanation": "[FIXTURE] " + " ".join(sents[:3]),
                 "teaching_bullets": [cited(s, i) for i, s in enumerate(sents[:12])] or [cited("fixture", 0)],
                 "definitions": [{"term": "Fixture term", "definition": "A placeholder definition.", "provenance": "additional", "refs": []}],
                 "why_it_matters": "[FIXTURE] why", "when_used": "[FIXTURE] when", "analogy": "[FIXTURE] analogy",
@@ -109,6 +117,8 @@ class MockProvider(Provider):
                 "overview": {"learning_objectives": ["[FIXTURE] objective 1", "objective 2"], "prerequisites": ["Python basics"],
                              "introduction": "[FIXTURE] Introduction.",
                              "takeaways": [{"text": f"[FIXTURE] takeaway {i}", "provenance": "taught", "refs": ["P1"]} for i in range(1, 11)],
+                             "foundations": [{"term": "Token", "plain_explanation": "[FIXTURE] a chunk of text.", "why_needed_here": "everywhere", "everyday_analogy": "lego bricks"}],
+                             "big_picture": {"one_paragraph_story": "[FIXTURE] story", "flow": ["Step 1 (Concept 1): a", "Step 2 (Concept 2): b"], "mental_model": "[FIXTURE] model", "where_this_fits": "[FIXTURE] fits"},
                              "user_edited_fields": []},
                 "summary": {"main_lessons": ["[FIXTURE] lesson"], "how_they_connect": "They connect.", "next_topic_announced": "",
                             "next_topic_was_announced": False, "suggested_next_steps": ["Review"], "user_edited_fields": []},
@@ -124,6 +134,17 @@ class MockProvider(Provider):
                                 "link_verified": False, "confidence": "unidentified", "why_it_matters": "[FIXTURE]", "refs": ["P1"], "is_additional_reading": False}],
                     "resources": [{"name": "Hugging Face", "kind": "website", "url_as_heard": "huggingface.co", "url": "", "url_verified": False,
                                    "uncertain": False, "purpose": "[FIXTURE] models", "refs": ["P1"], "is_additional": False}]}
+        elif step == "guide":
+            lids = re.findall(r"lecture_id=([a-f0-9]{12})", text)
+            cids = re.findall(r"concept_id=(c\d+)", text)
+            l0, c0 = (lids[0] if lids else "x"), (cids[0] if cids else "c1")
+            data = {"title": "[FIXTURE] Combined study guide", "story": "[FIXTURE] story",
+                    "themes": [{"theme": "[FIXTURE] theme", "summary": "s", "concepts": [{"lecture_id": l0, "concept_id": c0, "title": "t"}]}],
+                    "foundations": [{"term": "Token", "plain_explanation": "chunk", "why_needed_here": "", "everyday_analogy": ""}],
+                    "learning_path": [{"step": 1, "title": "Start", "what_to_do": "read", "lecture_id": l0, "concept_ids": [c0], "minutes": 20}],
+                    "interview_bank": [{"theme": "[FIXTURE] theme", "questions": [{"lecture_id": l0, "concept_id": c0, "index": 0}]}],
+                    "overlaps": ["[FIXTURE] overlap"], "gaps": ["[FIXTURE] gap"],
+                    "glossary": [{"term": "RAG", "explanation": "x", "concept_id": c0, "source": "speech", "refs": [l0]}]}
         elif step.startswith("image"):
             data = {"caption": "[FIXTURE] image caption", "ocr_text": "fixture text", "kind": "slide", "legibility": "clear"}
         else:

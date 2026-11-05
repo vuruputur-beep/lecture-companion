@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ g.title }} · Study guide{% endblock %}
+{% block content %}
+<div class="eyebrow"><a href="/guides">← Study guides</a></div>
+<div class="row between"><h1>{{ g.title }}</h1>
+  {% if guide %}<div class="dropdown"><button class="btn">Export ▾</button><div class="menu">{% for f in ['pdf','docx','md','html'] %}<a class="export-link" href="/guides/{{ g.id }}/export/{{ f }}">{{ f|upper }}</a>{% endfor %}</div></div>{% endif %}</div>
+<div class="row gap small muted"><span class="pill status {{ g.status }}">{{ g.status }}</span>
+  {% for lid in g.lecture_ids %}{% set l = lectures.get(lid) %}{% if l %}<a href="/lectures/{{ lid }}">W{{ l.week or '?' }} {{ l.title }}</a>{% endif %}{% endfor %}
+  {% if guide %}· {{ guide.model }} · ${{ '%.2f'|format(g.cost_usd or 0) }}{% endif %}</div>
+{% if g.status in ('queued','processing') %}
+<div id="jobstatus" data-lecture="{{ g.lecture_ids[0] }}" class="jobstatus active"><div class="progress big"><span id="jobProgress" style="width:{{ ((job.progress if job else 0)*100)|round|int }}%"></span></div><div id="jobMessage" class="small">{{ job.message if job else 'Queued…' }}</div></div>
+{% elif g.status == 'failed' %}<div class="alert error">Failed: {{ g.error }} <form method="post" action="/guides/{{ g.id }}/rebuild" class="inline"><button class="btn tiny">Retry</button></form></div>{% endif %}
+
+{% if guide %}
+<article class="reading single" id="reading">
+  <h2>How these lectures build on each other</h2><p class="lead">{{ guide.story }}</p>
+  {% if guide.foundations %}<h2>Before you start: the basics these lectures assume</h2>
+  <div class="foundations">{% for f in guide.foundations %}<details class="foundation"><summary><strong>{{ f.term }}</strong> <span class="muted small">{{ f.plain_explanation[:90] }}…</span></summary><p>{{ f.plain_explanation }}</p>{% if f.everyday_analogy %}<p><em>Think of it like:</em> {{ f.everyday_analogy }}</p>{% endif %}</details>{% endfor %}</div>{% endif %}
+  <h2>Themes across the lectures</h2>
+  {% for t in guide.themes %}<section class="card"><h3>{{ t.theme }}</h3><p>{{ t.summary }}</p><ul>{% for c in t.concepts %}<li><a href="/lectures/{{ c.lecture_id }}#concept-{{ c.concept_id }}">{{ c.title }}</a> <span class="muted small">{{ c.lecture_title }}</span></li>{% endfor %}</ul></section>{% endfor %}
+  <h2>Learning path <span class="muted small">(short sessions)</span></h2>
+  <ol class="flow">{% for st in guide.learning_path %}<li><strong>{{ st.title }}</strong> <span class="pill">~{{ st.minutes }} min</span> — {{ st.what_to_do }}{% if st.lecture_id %} <span class="small">[<a href="/lectures/{{ st.lecture_id }}{% if st.concept_ids %}#concept-{{ st.concept_ids[0] }}{% endif %}">{{ st.lecture_title }}</a>]</span>{% endif %}</li>{% endfor %}</ol>
+  {% if guide.overlaps or guide.gaps %}<h2>Overlaps and gaps</h2><ul>{% for o in guide.overlaps %}<li><span class="pill">overlap</span> {{ o }}</li>{% endfor %}{% for x in guide.gaps %}<li><span class="pill warn">gap</span> {{ x }}</li>{% endfor %}</ul>{% endif %}
+  <h2>Interview question bank</h2>
+  {% for grp in guide.interview_bank %}<h3>{{ grp.theme }}</h3>
+  {% for q in grp.questions %}<div class="card iq"><div class="small muted">{{ q.lecture_title }} · {{ q.concept_title }} · <span class="pill">{{ q.source }}</span></div><h4>{{ q.question }}</h4>
+    <details><summary>Reveal 30-60 s answer</summary><p>{{ q.short_answer }}</p></details><details><summary>Deeper answer</summary><p>{{ q.deep_answer }}</p></details></div>{% endfor %}{% endfor %}
+  <h2>Merged glossary</h2>
+  <dl class="defs two">{% for gl in guide.glossary %}<dt>{{ gl.term }}</dt><dd>{{ gl.explanation }} <span class="muted small">{% for r in gl.refs %}{% set l = lectures.get(r) %}{% if l %}<a href="/lectures/{{ r }}">W{{ l.week or '?' }}</a> {% endif %}{% endfor %}</span></dd>{% endfor %}</dl>
+</article>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if guide %}<script>initLecture({{ g.lecture_ids[0]|tojson }}, [], "", {{ guide.glossary|tojson }});</script>{% endif %}{% endblock %}

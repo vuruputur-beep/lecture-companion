@@ -7,6 +7,11 @@
 {% macro refs(r) %}{% if r %}<span class="refs">{% for x in r %}<a class="ref" href="?view=source#{{ x.split('@')[0] }}" title="Open in transcript">{{ x }}</a>{% endfor %}</span>{% endif %}{% endmacro %}
 {% macro prov(p) %}{% if p == 'additional' %}<span class="prov add" title="Supplemental explanation, not from the lecture">Additional</span>{% elif p == 'needs_verification' %}<span class="prov ver" title="Unclear or unverified">Needs verification</span>{% else %}<span class="prov taught" title="Taught in the lecture">Taught</span>{% endif %}{% endmacro %}
 {% macro cited(items, id_prefix) %}<ul class="cited">{% for it in items %}<li id="{{ id_prefix }}-{{ loop.index }}" class="annotatable">{{ it.text }} {{ prov(it.provenance) }}{{ refs(it.refs) }}</li>{% endfor %}</ul>{% endmacro %}
+{% macro regen(section, label, parts=None) %}{% if not version_view %}<details class="regen"><summary title="Regenerate just this section">↻ Regenerate {{ label }}</summary>
+<form method="post" action="/lectures/{{ lec.id }}/regenerate" class="row gap wrap small"><input type="hidden" name="sections" value="{{ section }}">
+{% if parts %}<select name="part"><option value="whole">whole concept</option>{% for k, v in parts %}<option value="{{ k }}">{{ v }} only</option>{% endfor %}</select>{% endif %}
+<input type="text" name="instruction" class="grow" placeholder="optional steer, e.g. simpler · more examples · shorter · more interview depth">
+<label class="check"><input type="checkbox" name="overwrite_edits" value="1"> overwrite my edits</label><button class="btn tiny primary">Regenerate</button></form></details>{% endif %}{% endmacro %}
 {% macro image(iid) %}{% set im = images.get(iid) %}{% if im %}<figure class="shot"><img loading="lazy" src="/lectures/{{ lec.id }}/images/{{ im.path.split('/')[-1] }}" alt="{{ im.caption }}"><figcaption>{{ im.id }} · {{ im.source_file }}{% if im.page %} p.{{ im.page }}{% endif %}{% if im.timestamp is not none %} @{{ im.timestamp|ts }}{% endif %} — {{ im.caption }}</figcaption></figure>{% endif %}{% endmacro %}
 
 {% block content %}
@@ -26,9 +31,10 @@
     <button class="btn" id="timerBtn" title="Study session timer">⏱ <span id="timerLabel">{{ cfg.study_session_minutes }} min</span></button>
     <div class="dropdown"><button class="btn">Export ▾</button>
       <div class="menu">
-        {% for fmt in ['pdf','docx','md','html'] %}<a href="/lectures/{{ lec.id }}/export/{{ fmt }}?mode=detailed">{{ fmt|upper }} · detailed</a>{% endfor %}
-        <hr>{% for fmt in ['pdf','docx','md','html'] %}<a href="/lectures/{{ lec.id }}/export/{{ fmt }}?mode=concise">{{ fmt|upper }} · concise</a>{% endfor %}
+        {% for fmt in ['pdf','docx','md','html'] %}<a class="export-link" href="/lectures/{{ lec.id }}/export/{{ fmt }}?mode=detailed">{{ fmt|upper }} · detailed</a>{% endfor %}
+        <hr>{% for fmt in ['pdf','docx','md','html'] %}<a class="export-link" href="/lectures/{{ lec.id }}/export/{{ fmt }}?mode=concise">{{ fmt|upper }} · concise</a>{% endfor %}
       </div></div>
+    <form method="post" action="/lectures/{{ lec.id }}/move" class="folderf" title="Folder"><select name="folder_id" onchange="this.form.submit()"><option value="">📁 no folder</option>{% for fid, fname in folder_choices %}<option value="{{ fid }}" {% if lec.folder_id == fid %}selected{% endif %}>📁 {{ fname }}</option>{% endfor %}</select></form>
     <div class="dropdown"><button class="btn">Mark ▾</button>
       <div class="menu">
         {% for st in ['unread','read','practiced','reviewed'] %}<form method="post" action="/lectures/{{ lec.id }}/state"><input type="hidden" name="state" value="{{ st }}"><button class="linklike">{{ st }}</button></form>{% endfor %}
@@ -43,9 +49,13 @@
   {% elif lec.status == 'failed' and last_job %}<div class="alert error">Generation failed: {{ last_job.error }} <form method="post" action="/lectures/{{ lec.id }}/generate" class="inline"><button class="btn tiny">Retry (resumes from checkpoint)</button></form></div>{% endif %}
 </div>
 
+{% if version_view %}<div class="alert warn"><strong>Read-only view of archived version v{{ version_view }}</strong>{% if version_meta.label %} · “{{ version_meta.label }}”{% endif %} · {{ notes.generated_at[:16] }} · {{ notes.model }}
+  <form method="post" action="/lectures/{{ lec.id }}/versions/{{ version_view }}/restore" class="inline" onsubmit="return confirm('Make this the current notes?')"><button class="btn tiny">Restore as current</button></form>
+  <a class="btn tiny" href="/lectures/{{ lec.id }}/versions">All versions</a> <a class="btn tiny" href="/lectures/{{ lec.id }}">Current notes</a></div>{% endif %}
 <nav class="tabs">
   {% for v, label in [('notes','Notes'),('interview','Interview'),('practice','Practice'),('source','Source material'),('coverage','Coverage'),('edit','Edit & regenerate')] %}
   <a class="{% if view == v %}active{% endif %}" href="?view={{ v }}">{{ label }}</a>{% endfor %}
+  <a href="/lectures/{{ lec.id }}/versions">Versions</a>
 </nav>
 
 {% if not notes %}
@@ -67,6 +77,8 @@
   <aside class="toc">
     <div class="eyebrow">Contents</div>
     <a href="#overview">Overview</a>
+    {% if notes.overview.foundations %}<a href="#foundations">Before you start</a>{% endif %}
+    {% if notes.overview.big_picture and notes.overview.big_picture.flow %}<a href="#big-picture">Big picture</a>{% endif %}
     {% for c in notes.concepts %}<a href="#concept-{{ c.id }}" class="toc-concept">{{ c.number }}. {{ c.title }}</a>{% endfor %}
     <a href="#glossary">Glossary</a><a href="#papers">Papers</a><a href="#resources">Resources</a><a href="#summary">Summary &amp; next</a>
     <div class="eyebrow top">Legend</div>
@@ -80,14 +92,42 @@
     {% if notes.global_flags %}<div class="alert warn small"><strong>Quality flags:</strong> {% for f in notes.global_flags %}<div>⚠ {{ f.kind }}: {{ f.note }} {{ refs(f.refs) }}</div>{% endfor %}</div>{% endif %}
 
     <section id="overview" class="block annotatable">
-      <h2>A. Lecture overview {% if notes.overview.user_edited_fields %}<span class="pill">edited</span>{% endif %}</h2>
+      <h2>A. Lecture overview {% if notes.overview.user_edited_fields %}<span class="pill">edited</span>{% endif %}{% if drafts and drafts.overview %}<a class="pill warn" href="?view=edit#edit-overview">draft pending · open editor</a>{% endif %}</h2>
       <div class="cols">
         <div><h4>Learning objectives</h4><ul>{% for x in notes.overview.learning_objectives %}<li>{{ x }}</li>{% endfor %}</ul></div>
         <div><h4>Prerequisites</h4><ul>{% for x in notes.overview.prerequisites %}<li>{{ x }}</li>{% endfor %}</ul></div>
       </div>
       <h4>Introduction</h4><p>{{ notes.overview.introduction }}</p>
       <h4>Key takeaways ({{ notes.overview.takeaways|length }})</h4>{{ cited(notes.overview.takeaways, 'takeaway') }}
+      {{ regen('overview', 'overview (also refreshes Before-you-start and Big picture)') }}
     </section>
+
+    {% if notes.overview.foundations %}
+    <section id="foundations" class="block annotatable">
+      <h2>Before you start: the basics this lecture assumes <span class="prov add">Background</span></h2>
+      <p class="muted">These were not taught in the lecture, but the instructor assumes you know them. Read these first if any term below is new to you.</p>
+      <div class="foundations">
+      {% for f in notes.overview.foundations %}
+      <details class="foundation" id="foundation-{{ loop.index }}"><summary><strong>{{ f.term }}</strong> <span class="muted small">{{ f.plain_explanation[:90] }}…</span></summary>
+        <p>{{ f.plain_explanation }}</p>
+        {% if f.everyday_analogy %}<p><em>Think of it like:</em> {{ f.everyday_analogy }}</p>{% endif %}
+        {% if f.why_needed_here %}<p class="small muted">Where it comes up: {{ f.why_needed_here }}</p>{% endif %}
+      </details>
+      {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% set bp = notes.overview.big_picture %}
+    {% if bp and (bp.one_paragraph_story or bp.flow) %}
+    <section id="big-picture" class="block annotatable">
+      <h2>The big picture: how it all fits together</h2>
+      {% if bp.one_paragraph_story %}<p class="lead">{{ bp.one_paragraph_story }}</p>{% endif %}
+      {% if bp.flow %}<h4>The flow, start to finish</h4><ol class="flow">{% for st in bp.flow %}<li>{{ st }}</li>{% endfor %}</ol>{% endif %}
+      {% if bp.mental_model %}<h4>One picture to remember</h4><p>{{ bp.mental_model }}</p>{% endif %}
+      {% if bp.where_this_fits %}<h4>Where this fits in the course and the FDE job</h4><p>{{ bp.where_this_fits }}</p>{% endif %}
+    </section>
+    {% endif %}
 
     <h2 class="section-title">B. Detailed concepts <span class="muted small">({{ notes.concepts|length }}) — click a concept to expand</span>
       <button class="btn tiny" onclick="document.querySelectorAll('details.concept').forEach(d=>d.open=true)">Expand all</button>
@@ -97,9 +137,10 @@
       <summary>
         <span class="num">{{ c.number }}</span>
         <span class="ctitle">{{ c.title }}</span>
-        <span class="meta">{{ c.time_range }}{% if not c.is_substantive %} · brief{% endif %}{% if c.user_edited_fields %} · <span class="pill">edited</span>{% endif %}{% if c.flags %} · ⚠ {{ c.flags|length }}{% endif %}</span>
+        <span class="meta">{{ c.time_range }}{% if not c.is_substantive %} · brief{% endif %}{% if c.user_edited_fields %} · <span class="pill">edited</span>{% endif %}{% if drafts and drafts['concept:' ~ c.id] %} · <span class="pill warn">draft pending</span>{% endif %}{% if c.flags %} · ⚠ {{ c.flags|length }}{% endif %}</span>
       </summary>
       <div class="concept-body">
+        {% if c.in_one_breath %}<p class="breath">{{ c.in_one_breath }}</p>{% endif %}
         <p class="lead">{{ c.plain_explanation }}</p>
         <h4>Teaching points</h4>{{ cited(c.teaching_bullets, 'c-' ~ c.id ~ '-tb') }}
         {% if c.definitions %}<h4>Definitions</h4><dl class="defs">{% for d in c.definitions %}<dt>{{ d.term }} {{ prov(d.provenance) }}</dt><dd>{{ d.definition }} {{ refs(d.refs) }}</dd>{% endfor %}</dl>{% endif %}
@@ -139,12 +180,13 @@
         </div>{% endfor %}{% endif %}
         {% if c.flags %}<div class="flags">{% for f in c.flags %}<div>⚠ <strong>{{ f.kind }}</strong>: {{ f.note }} {{ refs(f.refs) }}</div>{% endfor %}</div>{% endif %}
         <div class="row gap small"><a class="btn tiny" href="?view=edit#edit-concept-{{ c.id }}">Edit this concept</a></div>
+        {{ regen('concept:' ~ c.id, 'concept ' ~ c.number, [('explanation','explanation'),('teaching_bullets','teaching points'),('definitions','definitions'),('why_when','why it matters / when used'),('analogy','analogy'),('steps','step by step'),('examples','examples'),('pitfalls','assumptions, tradeoffs, mistakes'),('connections','connections'),('deeper_explanation','deeper explanation'),('fde_applications','FDE applications'),('moments','demos / Q&A'),('interview_questions','interview questions'),('flags','flags')]) }}
       </div>
     </details>
     {% endfor %}
 
     <section id="glossary" class="block"><h2>C. Technical glossary ({{ notes.glossary|length }})</h2>
-      <dl class="defs two">{% for g in notes.glossary %}<dt>{{ g.term }} <span class="muted small">{{ g.source }}{% if g.concept_id %} · <a href="#concept-{{ g.concept_id }}">{{ g.concept_id }}</a>{% endif %}</span></dt><dd>{{ g.explanation }} {{ refs(g.refs) }}</dd>{% endfor %}</dl></section>
+      <dl class="defs two">{% for g in notes.glossary %}<dt>{{ g.term }} <span class="muted small">{{ g.source }}{% if g.concept_id %} · <a href="#concept-{{ g.concept_id }}">{{ g.concept_id }}</a>{% endif %}</span></dt><dd>{{ g.explanation }} {{ refs(g.refs) }}</dd>{% endfor %}</dl>{{ regen('glossary', 'glossary') }}</section>
 
     <section id="papers" class="block"><h2>D. Research papers mentioned</h2>
       {% set lp = notes.papers|rejectattr('is_additional_reading')|list %}{% set ap = notes.papers|selectattr('is_additional_reading')|list %}
@@ -155,6 +197,7 @@
         {% if p.link %}<div><a href="{{ p.link }}" target="_blank" rel="noopener">{{ p.link }}</a> {% if p.link_verified %}<span class="pill ok">verified</span>{% else %}<span class="pill warn">unverified</span>{% endif %}</div>{% endif %}
         {% if p.why_it_matters %}<div class="small">{{ p.why_it_matters }}</div>{% endif %}</li>{% endfor %}</ul>
       {% if ap %}<h4>Additional reading (not mentioned in the lecture)</h4><ul>{% for p in ap %}<li>{{ p.identified_title or p.title_as_heard }}{% if p.link %} — <a href="{{ p.link }}" target="_blank" rel="noopener">{{ p.link }}</a>{% if p.link_verified %} <span class="pill ok">verified</span>{% endif %}{% endif %}</li>{% endfor %}</ul>{% endif %}
+      {{ regen('papers_resources', 'papers and resources') }}
     </section>
 
     <section id="resources" class="block"><h2>E. Websites and resources mentioned</h2>
@@ -167,12 +210,13 @@
       {% if ar %}<h4>Added recommendations (not mentioned in the lecture)</h4><ul>{% for r in ar %}<li>{{ r.name }} — {{ r.purpose }}{% if r.url %} — <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.url }}</a>{% endif %}</li>{% endfor %}</ul>{% endif %}
     </section>
 
-    <section id="summary" class="block annotatable"><h2>F. Summary and what comes next {% if notes.summary.user_edited_fields %}<span class="pill">edited</span>{% endif %}</h2>
+    <section id="summary" class="block annotatable"><h2>F. Summary and what comes next {% if notes.summary.user_edited_fields %}<span class="pill">edited</span>{% endif %}{% if drafts and drafts.summary %}<a class="pill warn" href="?view=edit#edit-summary">draft pending · open editor</a>{% endif %}</h2>
       <h4>Main lessons</h4><ul>{% for x in notes.summary.main_lessons %}<li>{{ x }}</li>{% endfor %}</ul>
       <h4>How they connect</h4><p>{{ notes.summary.how_they_connect }}</p>
       <h4>Next topic announced by the instructor</h4>
       {% if notes.summary.next_topic_was_announced %}<p>{{ notes.summary.next_topic_announced }}</p>{% else %}<p class="muted">The instructor did not announce the next topic in this transcript.</p>{% endif %}
       <h4>Suggested next study steps</h4><ul>{% for x in notes.summary.suggested_next_steps %}<li>{{ x }}</li>{% endfor %}</ul>
+      {{ regen('summary', 'summary') }}
     </section>
     <div class="endmark">End of notes · <a href="?view=practice">Go to practice →</a></div>
   </article>
@@ -215,6 +259,7 @@
     {% if ex.hints %}<details><summary>Hints</summary><ul>{% for h in ex.hints %}<li>{{ h }}</li>{% endfor %}</ul></details>{% endif %}
     {% if ex.solution_outline %}<details><summary>Solution outline</summary><p>{{ ex.solution_outline }}</p></details>{% endif %}
     <div class="small muted">Concepts: {% for cid in ex.concept_ids %}<a href="?view=notes#concept-{{ cid }}">{{ cid }}</a> {% endfor %}</div></div>{% endfor %}
+  {{ regen('practice', 'practice questions and exercises') }}
   <form method="post" action="/lectures/{{ lec.id }}/state"><input type="hidden" name="state" value="practiced"><button class="btn primary">Mark lecture as practiced</button></form>
 </section>
 {% endif %}
@@ -233,7 +278,7 @@
   <h3>Transcript <span class="muted small">({{ transcript.format }}, original speaker labels and timestamps preserved)</span></h3>
   <input type="search" id="tfilter" placeholder="Filter transcript paragraphs…" class="grow">
   <div class="transcript" id="transcript">
-    {% for s in transcript.segments %}<p id="{{ s.pid }}" class="seg"><a class="ref" href="#{{ s.pid }}">{{ s.pid }}{% if s.start is not none %} @{{ s.start|ts }}{% endif %}</a> {% if s.speaker %}<b>{{ s.speaker }}:</b>{% endif %} {{ s.text }}</p>{% endfor %}
+    {% for s in transcript.segments %}<p id="{{ s.pid }}" class="seg"><a class="ref" href="#{{ s.pid }}">{% if s.part %}pt{{ s.part }} {% endif %}{{ s.pid }}{% if s.start is not none %} @{{ s.start|ts }}{% elif s.after is not none %} after {{ s.after|ts }}{% endif %}</a> {% if s.speaker %}<b>{{ s.speaker }}:</b>{% endif %} {{ s.text }}</p>{% endfor %}
   </div>
   {% if transcript.sections %}<h3>Otter summary sections</h3>{% for sec in transcript.sections %}<h4>{{ sec.heading }}</h4><pre class="plain">{{ sec.text }}</pre>{% endfor %}{% endif %}
   <h3>Delete</h3>
@@ -264,25 +309,26 @@
 {% endif %}
 
 {# ================= EDIT ================= #}
-{% if notes and view == 'edit' %}
+{% if notes and view == 'edit' %}{% set en = edit_notes or notes %}
 <section class="reading single">
   <h2>Edit notes</h2>
-  <p class="muted small">Edits are saved into the notes model and preserved when sections are regenerated (unless you tick “overwrite my edits”). Bullet fields: one bullet per line; prefix <code>[A]</code> for additional explanation, <code>[?]</code> for needs-verification, and keep <code>⟨P12⟩</code> citations to retain links.</p>
+  <p class="muted small"><strong>Drafts:</strong> everything you type is autosaved as a draft (never changes the notes until you press <em>Publish</em>). Use <em>Save draft</em> to keep working later, <em>Publish</em> to apply, <em>Discard draft</em> to throw it away. Published edits are preserved when sections are regenerated (unless you tick “overwrite my edits”). Bullet fields: one bullet per line; prefix <code>[A]</code> for additional explanation, <code>[?]</code> for needs-verification, and keep <code>⟨P12⟩</code> citations to retain links.</p>
 
-  <form method="post" action="/lectures/{{ lec.id }}/edit/overview" class="card form" id="edit-overview">
-    <h3>A. Overview</h3>
-    <div class="field"><label>Introduction</label><textarea name="introduction" rows="3">{{ notes.overview.introduction }}</textarea></div>
-    <div class="cols"><div class="field"><label>Learning objectives (one per line)</label><textarea name="learning_objectives" rows="5">{{ notes.overview.learning_objectives|join('\n') }}</textarea></div>
-    <div class="field"><label>Prerequisites</label><textarea name="prerequisites" rows="5">{{ notes.overview.prerequisites|join('\n') }}</textarea></div></div>
-    <div class="field"><label>Takeaways</label><textarea name="takeaways" rows="8">{% for t in notes.overview.takeaways %}{{ t.text }}{% if t.refs %} ⟨{{ t.refs|join(', ') }}⟩{% endif %}
+  <form method="post" action="/lectures/{{ lec.id }}/edit/overview" class="card form draftable" id="edit-overview" data-section="overview">
+    <h3>A. Overview {% if drafts.overview %}<span class="pill warn">draft saved {{ drafts.overview.saved_at[11:16] }} UTC · unpublished</span>{% endif %}</h3>
+    <div class="field"><label>Introduction</label><textarea name="introduction" rows="3">{{ en.overview.introduction }}</textarea></div>
+    <div class="cols"><div class="field"><label>Learning objectives (one per line)</label><textarea name="learning_objectives" rows="5">{{ en.overview.learning_objectives|join('\n') }}</textarea></div>
+    <div class="field"><label>Prerequisites</label><textarea name="prerequisites" rows="5">{{ en.overview.prerequisites|join('\n') }}</textarea></div></div>
+    <div class="field"><label>Takeaways</label><textarea name="takeaways" rows="8">{% for t in en.overview.takeaways %}{{ t.text }}{% if t.refs %} ⟨{{ t.refs|join(', ') }}⟩{% endif %}
 {% endfor %}</textarea></div>
-    <button class="btn">Save overview</button>
+    <div class="row gap"><button class="btn" name="action" value="draft">Save draft</button><button class="btn primary" name="action" value="publish">Publish overview</button>{% if drafts.overview %}<button class="btn danger" name="action" value="discard">Discard draft</button>{% endif %}<span class="draft-status small muted"></span></div>
   </form>
 
-  {% for c in notes.concepts %}
-  <form method="post" action="/lectures/{{ lec.id }}/edit/concept:{{ c.id }}" class="card form" id="edit-concept-{{ c.id }}">
-    <h3>Concept {{ c.number }} {% if c.user_edited_fields %}<span class="pill">edited: {{ c.user_edited_fields|join(', ') }}</span>{% endif %}</h3>
+  {% for c in en.concepts %}
+  <form method="post" action="/lectures/{{ lec.id }}/edit/concept:{{ c.id }}" class="card form draftable" id="edit-concept-{{ c.id }}" data-section="concept:{{ c.id }}">
+    <h3>Concept {{ c.number }} {% if c.user_edited_fields %}<span class="pill">edited: {{ c.user_edited_fields|join(', ') }}</span>{% endif %}{% if drafts['concept:' ~ c.id] %}<span class="pill warn">draft saved {{ drafts['concept:' ~ c.id].saved_at[11:16] }} UTC · unpublished</span>{% endif %}</h3>
     <div class="field"><label>Title</label><input name="title" value="{{ c.title }}"></div>
+    <div class="field"><label>In one breath (no jargon)</label><textarea name="in_one_breath" rows="2">{{ c.in_one_breath }}</textarea></div>
     <div class="field"><label>Plain-English explanation</label><textarea name="plain_explanation" rows="4">{{ c.plain_explanation }}</textarea></div>
     <div class="field"><label>Teaching bullets</label><textarea name="teaching_bullets" rows="10">{% for b in c.teaching_bullets %}{{ {'taught':'[T] ','additional':'[A] ','needs_verification':'[?] '}[b.provenance] }}{{ b.text }}{% if b.refs %} ⟨{{ b.refs|join(', ') }}⟩{% endif %}
 {% endfor %}</textarea></div>
@@ -297,16 +343,16 @@
     <div class="field"><label>Deeper explanation</label><textarea name="deeper_explanation" rows="4">{{ c.deeper_explanation }}</textarea></div>
     <div class="field"><label>FDE applications</label><textarea name="fde_applications" rows="3">{% for b in c.fde_applications %}{{ {'taught':'[T] ','additional':'[A] ','needs_verification':'[?] '}[b.provenance] }}{{ b.text }}
 {% endfor %}</textarea></div>
-    <button class="btn">Save concept {{ c.number }}</button>
+    <div class="row gap"><button class="btn" name="action" value="draft">Save draft</button><button class="btn primary" name="action" value="publish">Publish concept {{ c.number }}</button>{% if drafts['concept:' ~ c.id] %}<button class="btn danger" name="action" value="discard">Discard draft</button>{% endif %}<span class="draft-status small muted"></span></div>
   </form>
   {% endfor %}
 
-  <form method="post" action="/lectures/{{ lec.id }}/edit/summary" class="card form" id="edit-summary">
-    <h3>F. Summary</h3>
-    <div class="field"><label>Main lessons</label><textarea name="main_lessons" rows="5">{{ notes.summary.main_lessons|join('\n') }}</textarea></div>
-    <div class="field"><label>How they connect</label><textarea name="how_they_connect" rows="3">{{ notes.summary.how_they_connect }}</textarea></div>
-    <div class="field"><label>Suggested next steps</label><textarea name="suggested_next_steps" rows="4">{{ notes.summary.suggested_next_steps|join('\n') }}</textarea></div>
-    <button class="btn">Save summary</button>
+  <form method="post" action="/lectures/{{ lec.id }}/edit/summary" class="card form draftable" id="edit-summary" data-section="summary">
+    <h3>F. Summary {% if drafts.summary %}<span class="pill warn">draft saved {{ drafts.summary.saved_at[11:16] }} UTC · unpublished</span>{% endif %}</h3>
+    <div class="field"><label>Main lessons</label><textarea name="main_lessons" rows="5">{{ en.summary.main_lessons|join('\n') }}</textarea></div>
+    <div class="field"><label>How they connect</label><textarea name="how_they_connect" rows="3">{{ en.summary.how_they_connect }}</textarea></div>
+    <div class="field"><label>Suggested next steps</label><textarea name="suggested_next_steps" rows="4">{{ en.summary.suggested_next_steps|join('\n') }}</textarea></div>
+    <div class="row gap"><button class="btn" name="action" value="draft">Save draft</button><button class="btn primary" name="action" value="publish">Publish summary</button>{% if drafts.summary %}<button class="btn danger" name="action" value="discard">Discard draft</button>{% endif %}<span class="draft-status small muted"></span></div>
   </form>
 
   <form method="post" action="/lectures/{{ lec.id }}/regenerate" class="card form">
@@ -316,8 +362,20 @@
       {% for k, label in [('overview','A. Overview'),('glossary','C. Glossary'),('papers_resources','D/E. Papers & resources'),('summary','F. Summary'),('practice','G. Practice')] %}<label class="check"><input type="checkbox" name="sections" value="{{ k }}"> {{ label }}</label>{% endfor %}
       {% for c in notes.concepts %}<label class="check"><input type="checkbox" name="sections" value="concept:{{ c.id }}"> Concept {{ c.number }}: {{ c.title[:50] }}</label>{% endfor %}
     </div>
+    <div class="field"><label>Optional instruction for the model</label><input type="text" name="instruction" placeholder="e.g. simpler language, more worked examples, shorter bullets"></div>
     <label class="check"><input type="checkbox" name="overwrite_edits" value="1"> Overwrite my edits in the regenerated sections</label>
     <button class="btn primary">Regenerate selected</button>
+  </form>
+  <form method="post" action="/lectures/{{ lec.id }}/regenerate_all" class="card form">
+    <h3>Regenerate all sections with the current prompts</h3>
+    <p class="muted small">Rewrites every section (concepts, overview, glossary, practice, papers) while reusing the stored inventory and outline. Use this after a prompt/style change. The previous notes are archived under Versions.</p>
+    <label class="check"><input type="checkbox" name="overwrite_edits" value="1"> Overwrite my edits</label>
+    <button class="btn primary">Regenerate all sections</button>
+  </form>
+  <form method="post" action="/lectures/{{ lec.id }}/reparse" class="card form">
+    <h3>Re-parse transcript and regenerate everything</h3>
+    <p class="muted small">Re-reads the original transcript file(s) with the current parser (paragraph splitting, timestamps), then runs the full pipeline from scratch. Use this after a parser change or if citations look wrong.</p>
+    <button class="btn">Re-parse and regenerate</button>
   </form>
   <form method="post" action="/lectures/{{ lec.id }}/generate" class="card form">
     <h3>Full regeneration</h3>
@@ -327,9 +385,16 @@
 </section>
 {% endif %}
 
+<div id="selToolbar" class="popover seltool hidden">
+  <button data-mode="explain" title="Explain the selected passage for a beginner">💡 Explain this</button>
+  <button data-mode="simpler" title="Rewrite the selection in simpler words">✂ Simpler</button>
+  <button data-mode="example" title="Give a concrete example">🧪 Example</button>
+  <button data-mode="why" title="Why is this true / why does it matter">❓ Why</button>
+  <button data-mode="note" title="Attach your own note to this selection">📝 My note</button>
+</div>
 <div id="annPopover" class="popover hidden">
   <button data-kind="bookmark">🔖 Bookmark</button><button data-kind="review">↺ Review marker</button><button data-kind="note">📝 Note</button>
 </div>
 <div id="timerPanel" class="timer hidden"><div id="timerClock">00:00</div><div class="row gap"><button class="btn tiny" id="timerStart">Start</button><button class="btn tiny" id="timerPause">Pause</button><button class="btn tiny" id="timerReset">Reset</button><input type="number" id="timerMinutes" min="5" max="90" value="{{ cfg.study_session_minutes }}"> min</div><div class="small muted">Session ends with a gentle chime; take a break, then continue where you left off.</div></div>
 {% endblock %}
-{% block scripts %}<script>initLecture({{ lec.id|tojson }}, {{ annotations|tojson }}, {{ (lec.reading_position or '')|tojson }});</script>{% endblock %}
+{% block scripts %}<script>initLecture({{ lec.id|tojson }}, {{ annotations|tojson }}, {{ (lec.reading_position or '')|tojson }}, {{ (notes.glossary if notes else [])|tojson }});</script>{% endblock %}

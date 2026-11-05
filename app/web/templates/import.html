@@ -4,10 +4,11 @@
 <h1>Import lectures</h1>
 <p class="muted">Upload Otter.ai exports (TXT, SRT, VTT, DOCX, text-based PDF) or paste a transcript. Multiple files create one lecture each. You will confirm title, course, week and date on the next screen before anything is generated.</p>
 {% if errors %}<div class="alert error">{% for e in errors %}<div>{{ e }}</div>{% endfor %}</div>{% endif %}
-<form class="card form" method="post" action="/import" enctype="multipart/form-data">
+<form class="card form" method="post" action="/import" enctype="multipart/form-data" id="importForm">
   <div class="field">
     <label>Transcript files</label>
     <input type="file" name="transcripts" multiple accept=".txt,.srt,.vtt,.docx,.pdf,.md">
+    <label class="check"><input type="checkbox" name="combine" value="1"> Combine these files into <strong>one</strong> lecture (parts of the same session, in the order selected)</label>
     <div class="hint">Otter: open a conversation → Export → choose TXT (with speakers & timestamps) for best results. Timestamps and speaker labels are preserved; summaries are detected and flagged.</div>
   </div>
   <div class="field">
@@ -21,12 +22,16 @@
     <div class="field"><label>Week</label><input type="number" name="week" min="1" max="52" placeholder="auto-detect"></div>
     <div class="field"><label>Date</label><input type="date" name="lecture_date"></div>
   </div>
-  <div class="field"><label>Title (single lecture only; auto-detected otherwise)</label><input type="text" name="title" placeholder="e.g. Week 4 - RAG systems"></div>
+  <div class="cols">
+    <div class="field grow"><label>Title (single lecture only; auto-detected otherwise)</label><input type="text" name="title" placeholder="e.g. Week 4 - RAG systems"></div>
+    <div class="field"><label>Folder (optional)</label><select name="folder_id"><option value="">— none —</option>{% for fid, fname in folder_choices %}<option value="{{ fid }}">{{ fname }}</option>{% endfor %}</select></div>
+  </div>
   <div class="field">
     <label>Optional attachments for this lecture (slides PDF, screenshots PNG/JPG, recording)</label>
     <input type="file" name="attachments" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.mov,.m4a,.mp3,.wav,.mkv,.webm">
     <div class="hint">Slides are split into pages and described; screenshots are described and their visible text extracted. Recordings are stored for the video-processing release and are not transcribed here. When importing several transcripts at once, attachments go to the first lecture — attach others from each lecture's Source tab.</div>
   </div>
-  <button class="btn primary" type="submit">Upload and review</button>
+  <button class="btn primary" type="submit" id="importBtn">Upload and review</button>
+  <div id="uploadStatus" class="upload-status hidden"><div class="progress big"><span id="uploadBar" style="width:0%"></span></div><div id="uploadMsg" class="small muted">Uploading…</div></div>
 </form>
 {% endblock %}
